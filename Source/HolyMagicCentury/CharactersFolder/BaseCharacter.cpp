@@ -12,7 +12,10 @@
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
 	WalkSpeed(300.0f),
-	RunSpeed(600.0f)
+	RunSpeed(600.0f),
+	JumpVelocity(150.0f),
+	ManJumpVelocity(150.0f),
+	TVJumpVelocity(300.0f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -54,6 +57,15 @@ ABaseCharacter::ABaseCharacter() :
 
 void ABaseCharacter::Jump()
 {
+	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
+	{
+		const bool bIsFalling = CharacterMovementComp->IsFalling();
+		if (bIsFalling)
+		{
+			return;
+		}
+	}
+
 	ACharacter::Jump();
 }
 
@@ -68,6 +80,15 @@ void ABaseCharacter::OnActionPressed()
 	if (!AnimInstance)
 	{
 		return;
+	}
+
+	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
+	{
+		const bool bIsFalling = CharacterMovementComp->IsFalling();
+		if (bIsFalling)
+		{
+			return;
+		}
 	}
 
 	const bool bIsHiding = AnimInstance->IsHiding();
@@ -134,6 +155,11 @@ void ABaseCharacter::BeginPlay()
 		}
 		++Index;
 	}
+
+	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
+	{
+		CharacterMovementComp->MaxWalkSpeed = RunSpeed;
+	}	
 }
 
 // Called every frame
@@ -190,25 +216,7 @@ void ABaseCharacter::MoveInDirection(EAxis::Type Axis, const float Value)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.33f, FColor::Red, FString::Printf(TEXT("Vel: %.1f"), Value));
 	}	
-
-	// We want to limit the acceleration depending on the value.
-	//if (Value > 0.0f && Value <= 0.5f)
-	//{
-	//	// 50% Tilt, clamp to walk.
-
-	//	if (VectorLength >= WalkSpeed)
-	//	{
-	//		SetVelocity(WalkSpeed);
-	//	}
-	//	else
-	//	{
-	//		AddMovementInput(Direction, Value);
-	//	}
-	//}
-	//else
-	{
-		AddMovementInput(Direction, Value);
-	}
+	AddMovementInput(Direction, Value);
 }
 
 void ABaseCharacter::MoveForward(float Value)
@@ -282,6 +290,13 @@ void ABaseCharacter::SetHiding(bool Value)
 	}
 
 	AnimInstance->SetHiding(Value);
+
+	JumpVelocity = Value ? TVJumpVelocity : ManJumpVelocity;
+	
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->JumpZVelocity = JumpVelocity;
+	}	
 }
 
 void ABaseCharacter::SetVelocity(const float Value)
