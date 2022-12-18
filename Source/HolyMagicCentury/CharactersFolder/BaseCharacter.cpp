@@ -82,6 +82,11 @@ void ABaseCharacter::OnActionPressed()
 		return;
 	}
 
+	if (AnimInstance->IsLeaping())
+	{
+		return;
+	}
+
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
 	{
 		const bool bIsFalling = CharacterMovementComp->IsFalling();
@@ -98,6 +103,44 @@ void ABaseCharacter::OnActionPressed()
 void ABaseCharacter::OnActionReleased()
 {
 
+}
+
+void ABaseCharacter::OnLeapPressed()
+{
+	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
+	if (!AnimInstance)
+	{
+		return;
+	}
+
+	if (AnimInstance->IsHiding())
+	{
+		return;
+	}
+
+	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
+	{
+		const bool bIsFalling = CharacterMovementComp->IsFalling();
+		if (bIsFalling)
+		{
+			return;
+		}
+	}	
+
+	SetLeaping(true);
+
+	// Add Impulse
+	//MoveForward(RunSpeed);
+	
+	//const FVector ImpulseVector = GetActorForwardVector() * 1000.0f;
+	
+}
+
+void ABaseCharacter::OnLeapReleased()
+{
+	// Might need to push this onto a timer.
+	// Or a callback on the anim notify?
+	SetLeaping(false);
 }
 
 void ABaseCharacter::SetBodyAlpha(float Value)
@@ -178,6 +221,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &ABaseCharacter::OnActionPressed);
 	PlayerInputComponent->BindAction("Action", IE_Released, this, &ABaseCharacter::OnActionReleased);
+
+	PlayerInputComponent->BindAction("Leap", IE_Pressed, this, &ABaseCharacter::OnLeapPressed);
+	PlayerInputComponent->BindAction("Leap", IE_Released, this, &ABaseCharacter::OnLeapReleased);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABaseCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABaseCharacter::MoveRight);
@@ -297,6 +343,17 @@ void ABaseCharacter::SetHiding(bool Value)
 	{
 		CharacterMovementComponent->JumpZVelocity = JumpVelocity;
 	}	
+}
+
+void ABaseCharacter::SetLeaping(bool Value)
+{
+	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
+	if (!AnimInstance)
+	{
+		return;
+	}
+
+	AnimInstance->SetLeaping(Value);
 }
 
 void ABaseCharacter::SetVelocity(const float Value)

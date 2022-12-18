@@ -21,8 +21,14 @@ public:
 	FORCEINLINE void SetHiding(bool Value) { bIsHiding = Value; }
 	FORCEINLINE bool IsHiding() const { return bIsHiding; }
 
+	FORCEINLINE void SetLeaping(bool Value) { bIsLeaping = Value; }
+	FORCEINLINE bool IsLeaping() const { return bIsLeaping; }
+	
 private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	bool bIsHiding;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	bool bIsLeaping;
 };

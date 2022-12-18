@@ -39,6 +39,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void OnActionReleased();
 
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	void OnLeapPressed();
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	void OnLeapReleased();
+
 	void SetBodyAlpha(float Value);
 private:
 
@@ -58,6 +64,7 @@ private:
 	
 	UBaseCharacterAnimationInstance* GetAnimInstance() const;
 	void SetHiding(bool Value);
+	void SetLeaping(bool Value);
 
 	void SetVelocity(const float Value);
 
