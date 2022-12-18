@@ -12,6 +12,8 @@ class UCameraComponent;
 class USpringArmComponent;
 class UBaseCharacterAnimationInstance;
 class UMaterialInstanceDynamic;
+class UActionBase;
+class UActionManager;
 
 namespace MaterialParameterNames
 {
@@ -46,6 +48,12 @@ public:
 	void OnLeapReleased();
 
 	void SetBodyAlpha(float Value);
+
+	UBaseCharacterAnimationInstance* GetAnimInstance() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Charcater")
+	void SetFlying(bool Value);
+
 private:
 
 	virtual void BeginPlay() override;
@@ -62,9 +70,7 @@ private:
 	virtual void AddControllerYawInput(float Value) override;	
 	virtual void AddControllerPitchInput(float Value) override;
 	
-	UBaseCharacterAnimationInstance* GetAnimInstance() const;
 	void SetHiding(bool Value);
-	void SetLeaping(bool Value);
 
 	void SetVelocity(const float Value);
 
@@ -99,4 +105,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+	UActionManager* ActionManager;
 };

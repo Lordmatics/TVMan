@@ -8,6 +8,10 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include "../AnimationFolder/BaseCharacterAnimationInstance.h"
 #include <Materials/MaterialInstanceDynamic.h>
+#include "../ActionsFolder/ActionBase.h"
+#include "../ActionsFolder/LeapAction.h"
+#include "../ActionsFolder/ActionManager.h"
+#include "../ActionsFolder/DefaultAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
@@ -53,6 +57,173 @@ ABaseCharacter::ABaseCharacter() :
 	ThirdPersonCamera->SetupAttachment(ThirdPersonSpringArm, USpringArmComponent::SocketName);	
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
+}
+
+// Called when the game starts or when spawned
+void ABaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	ActionManager = NewObject<UActionManager>(this);
+	ActionManager->InitialiseManager(this);
+
+	UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
+	ActionManager->RequestAction(ActionNames::DefaultAction, ActionData);
+
+	if (DynamicMaterials.Num() > 0)
+	{
+		DynamicMaterials.Empty();
+	}	
+
+	// Create Material Instance.
+	USkeletalMeshComponent* SkeletalMesh = GetMesh();
+	if (!SkeletalMesh)
+	{
+		return;
+	}
+
+	const TArray<UMaterialInterface*>& Materials = SkeletalMesh->GetMaterials();
+	int Index = 0;
+	for (UMaterialInterface* Material : Materials)
+	{
+		if (!Material)
+		{
+			++Index;
+			continue;
+		}
+
+		if (UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this))
+		{
+			DynamicMaterials.Push(DynamicMaterial);
+			SkeletalMesh->SetMaterial(Index, DynamicMaterial);
+		}
+		++Index;
+	}
+
+	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
+	{
+		CharacterMovementComp->MaxWalkSpeed = RunSpeed;
+	}	
+}
+
+// Called every frame
+void ABaseCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (ActionManager)
+	{
+		const bool bProcessSuccess = ActionManager->Process(DeltaTime);
+		if (!bProcessSuccess)
+		{
+			UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
+			ActionManager->RequestAction(ActionNames::DefaultAction, ActionData);
+		}
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("ActionName: %s"), *ActionManager->GetCurrentActionName()));
+		}
+	}
+}
+
+// Called to bind functionality to input
+void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABaseCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ABaseCharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &ABaseCharacter::OnActionPressed);
+	PlayerInputComponent->BindAction("Action", IE_Released, this, &ABaseCharacter::OnActionReleased);
+
+	PlayerInputComponent->BindAction("Leap", IE_Pressed, this, &ABaseCharacter::OnLeapPressed);
+	PlayerInputComponent->BindAction("Leap", IE_Released, this, &ABaseCharacter::OnLeapReleased);
+
+	PlayerInputComponent->BindAxis("MoveForward", this, &ABaseCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ABaseCharacter::MoveRight);
+
+	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
+	// "turn" handles devices that provide an absolute delta, such as a mouse.
+	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
+	PlayerInputComponent->BindAxis("Turn", this, &ABaseCharacter::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("TurnRate", this, &ABaseCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("LookUp", this, &ABaseCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &ABaseCharacter::LookUpAtRate);
+}
+
+void ABaseCharacter::MoveInDirection(EAxis::Type Axis, const float Value)
+{	
+	if (!Controller)
+	{
+		return;
+	}
+
+	if (Value == 0.0f)
+	{
+		return;
+	}
+
+	// find out which way is forward
+	const FRotator& Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+	// get forward vector
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(Axis);
+
+	const FVector& Velocity = GetVelocity();
+	const float VectorLength = Velocity.Size();
+
+	AddMovementInput(Direction, Value);
+}
+
+void ABaseCharacter::MoveForward(float Value)
+{
+	MoveInDirection(EAxis::X, Value);
+}
+
+void ABaseCharacter::MoveRight(float Value)
+{
+	MoveInDirection(EAxis::Y, Value);	
+}
+
+void ABaseCharacter::TurnAtRate(float Rate)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	const float DeltaSeconds = World->GetDeltaSeconds();
+	const float YawInput = Rate * BaseTurnRate * DeltaSeconds;
+	AddControllerYawInput(YawInput);
+}
+
+void ABaseCharacter::LookUpAtRate(float Rate)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	const float DeltaSeconds = World->GetDeltaSeconds();
+	const float PitchInput = Rate * BaseLookUpRate * DeltaSeconds;
+
+	AddControllerPitchInput(PitchInput);
+}
+
+void ABaseCharacter::AddControllerYawInput(float Value)
+{
+	APawn::AddControllerYawInput(Value);
+}
+
+void ABaseCharacter::AddControllerPitchInput(float Value)
+{
+	Value *= -1.0f;
+	APawn::AddControllerPitchInput(Value);
 }
 
 void ABaseCharacter::Jump()
@@ -125,22 +296,17 @@ void ABaseCharacter::OnLeapPressed()
 		{
 			return;
 		}
-	}	
+	}
 
-	SetLeaping(true);
-
-	// Add Impulse
-	//MoveForward(RunSpeed);
-	
-	//const FVector ImpulseVector = GetActorForwardVector() * 1000.0f;
-	
+	if (ActionManager)
+	{
+		ULeapActionData* LeapData = NewObject<ULeapActionData>(this);
+		ActionManager->RequestAction(ActionNames::LeapAction, LeapData);
+	}
 }
 
 void ABaseCharacter::OnLeapReleased()
 {
-	// Might need to push this onto a timer.
-	// Or a callback on the anim notify?
-	SetLeaping(false);
 }
 
 void ABaseCharacter::SetBodyAlpha(float Value)
@@ -164,157 +330,6 @@ void ABaseCharacter::SetBodyAlpha(float Value)
 	}
 }
 
-// Called when the game starts or when spawned
-void ABaseCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	if (DynamicMaterials.Num() > 0)
-	{
-		DynamicMaterials.Empty();
-	}	
-
-	// Create Material Instance.
-	USkeletalMeshComponent* SkeletalMesh = GetMesh();
-	if (!SkeletalMesh)
-	{
-		return;
-	}
-
-	const TArray<UMaterialInterface*>& Materials = SkeletalMesh->GetMaterials();
-	int Index = 0;
-	for (UMaterialInterface* Material : Materials)
-	{
-		if (!Material)
-		{
-			++Index;
-			continue;
-		}
-
-		if (UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this))
-		{
-			DynamicMaterials.Push(DynamicMaterial);
-			SkeletalMesh->SetMaterial(Index, DynamicMaterial);
-		}
-		++Index;
-	}
-
-	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
-	{
-		CharacterMovementComp->MaxWalkSpeed = RunSpeed;
-	}	
-}
-
-// Called every frame
-void ABaseCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-// Called to bind functionality to input
-void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABaseCharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ABaseCharacter::StopJumping);
-
-	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &ABaseCharacter::OnActionPressed);
-	PlayerInputComponent->BindAction("Action", IE_Released, this, &ABaseCharacter::OnActionReleased);
-
-	PlayerInputComponent->BindAction("Leap", IE_Pressed, this, &ABaseCharacter::OnLeapPressed);
-	PlayerInputComponent->BindAction("Leap", IE_Released, this, &ABaseCharacter::OnLeapReleased);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &ABaseCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ABaseCharacter::MoveRight);
-
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &ABaseCharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &ABaseCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &ABaseCharacter::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &ABaseCharacter::LookUpAtRate);
-}
-
-void ABaseCharacter::MoveInDirection(EAxis::Type Axis, const float Value)
-{	
-	if (!Controller)
-	{
-		return;
-	}
-
-	if (Value == 0.0f)
-	{
-		return;
-	}
-
-	// find out which way is forward
-	const FRotator& Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-	// get forward vector
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(Axis);
-
-	const FVector& Velocity = GetVelocity();
-	const float VectorLength = Velocity.Size();
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.33f, FColor::Red, FString::Printf(TEXT("Vel: %.1f"), Value));
-	}	
-	AddMovementInput(Direction, Value);
-}
-
-void ABaseCharacter::MoveForward(float Value)
-{
-	MoveInDirection(EAxis::X, Value);
-}
-
-void ABaseCharacter::MoveRight(float Value)
-{
-	MoveInDirection(EAxis::Y, Value);	
-}
-
-void ABaseCharacter::TurnAtRate(float Rate)
-{
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
-	const float DeltaSeconds = World->GetDeltaSeconds();
-	const float YawInput = Rate * BaseTurnRate * DeltaSeconds;
-	AddControllerYawInput(YawInput);
-}
-
-void ABaseCharacter::LookUpAtRate(float Rate)
-{
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
-	const float DeltaSeconds = World->GetDeltaSeconds();
-	const float PitchInput = Rate * BaseLookUpRate * DeltaSeconds;
-
-	//GEngine->AddOnScreenDebugMessage(-1, DeltaSeconds, FColor::Red, FString::Printf(TEXT("LookUpRate: %.1f"), PitchInput));
-
-	AddControllerPitchInput(PitchInput);
-}
-
-void ABaseCharacter::AddControllerYawInput(float Value)
-{
-	APawn::AddControllerYawInput(Value);
-}
-
-void ABaseCharacter::AddControllerPitchInput(float Value)
-{
-	Value *= -1.0f;
-	APawn::AddControllerPitchInput(Value);
-}
-
 UBaseCharacterAnimationInstance* ABaseCharacter::GetAnimInstance() const
 {
 	USkeletalMeshComponent* SkeletalMesh = GetMesh();
@@ -325,6 +340,22 @@ UBaseCharacterAnimationInstance* ABaseCharacter::GetAnimInstance() const
 
 	UBaseCharacterAnimationInstance* AnimInstance = Cast<UBaseCharacterAnimationInstance>(SkeletalMesh->GetAnimInstance());
 	return AnimInstance;
+}
+
+// Root Motion in the Z Only works if you are in flying mode!
+void ABaseCharacter::SetFlying(bool Value)
+{
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		if (Value)
+		{
+			CharacterMovementComponent->SetMovementMode(MOVE_Flying);
+		}
+		else
+		{			
+			CharacterMovementComponent->SetDefaultMovementMode();
+		}		
+	}
 }
 
 void ABaseCharacter::SetHiding(bool Value)
@@ -343,17 +374,6 @@ void ABaseCharacter::SetHiding(bool Value)
 	{
 		CharacterMovementComponent->JumpZVelocity = JumpVelocity;
 	}	
-}
-
-void ABaseCharacter::SetLeaping(bool Value)
-{
-	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	AnimInstance->SetLeaping(Value);
 }
 
 void ABaseCharacter::SetVelocity(const float Value)

@@ -1,0 +1,58 @@
+// Lordmatics Games December 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "HolyMagicCentury/ActionsFolder/ActionBase.h"
+#include "LeapAction.generated.h"
+
+/**
+ * 
+ */
+
+namespace ActionNames
+{
+	const FName LeapAction = FName(TEXT("LeapAction"));
+}
+
+UCLASS(EditInlineNew)
+class HOLYMAGICCENTURY_API ULeapActionData : public UActionDataBase
+{
+	GENERATED_BODY()
+
+public:
+	ULeapActionData();
+	virtual ~ULeapActionData();
+
+	virtual void InitialiseObject() override;
+
+private:
+
+};
+
+UCLASS(EditInlineNew)
+class HOLYMAGICCENTURY_API ULeapAction : public UActionBase
+{
+	GENERATED_BODY()
+
+public:
+
+	ULeapAction();
+	virtual ~ULeapAction();	
+
+	virtual void InitialiseAction(UActionDataBase* ActionData) override;
+
+	virtual void OnActionCreated() override;
+	virtual void OnActionProcess(const float DeltaTime) override;
+	virtual void OnActionDestroyed() override;
+
+	virtual const FName GetActionName() const { return ActionNames::LeapAction; }
+
+private:
+
+	/*UPROPERTY(EditAnywhere, Category = "Test")
+		float TestLeap;*/
+
+	float Timer;
+	float ProcessDelayTime;
+};
