@@ -5,8 +5,6 @@
 
 UBaseCharacterAnimationInstance::UBaseCharacterAnimationInstance() :
 	Super(),
-	bIsWalking(false),
-	bIsRunning(false),
 	bIsHiding(false)
 {
 

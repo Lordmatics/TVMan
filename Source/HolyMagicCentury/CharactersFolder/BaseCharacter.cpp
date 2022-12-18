@@ -10,7 +10,9 @@
 #include <Materials/MaterialInstanceDynamic.h>
 
 // Sets default values
-ABaseCharacter::ABaseCharacter()
+ABaseCharacter::ABaseCharacter() :
+	WalkSpeed(300.0f),
+	RunSpeed(600.0f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -36,6 +38,7 @@ ABaseCharacter::ABaseCharacter()
 		MyCharacterMovement->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 		MyCharacterMovement->JumpZVelocity = 600.f;
 		MyCharacterMovement->AirControl = 0.2f;
+		//MyCharacterMovement->Acceleration = 1000.0f; // Set this in the BP.
 	}
 
 	ThirdPersonSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("ThirdPersonSpringArm"));
@@ -137,34 +140,6 @@ void ABaseCharacter::BeginPlay()
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	UCharacterMovementComponent* CharMover = GetCharacterMovement();
-	if (!CharMover)
-	{
-		ResetAnimationMovement();
-		return;
-	}
-
-	const FVector& Velocity = CharMover->GetLastUpdateVelocity();
-	const float Speed = Velocity.Size();
-
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Speed: %.1f"), Speed));
-	if (Speed > 0.0f)
-	{
-		//if (Speed >= 0.5f)
-		//{
-		//	SetRunning(true);
-		//}
-		//else
-		
-		{
-			SetWalking(true);
-		}
-	}
-	else
-	{
-		ResetAnimationMovement();
-	}
 }
 
 // Called to bind functionality to input
@@ -194,13 +169,11 @@ void ABaseCharacter::MoveInDirection(EAxis::Type Axis, const float Value)
 {	
 	if (!Controller)
 	{
-		ResetAnimationMovement();
 		return;
 	}
 
 	if (Value == 0.0f)
 	{
-		ResetAnimationMovement();
 		return;
 	}
 
@@ -210,8 +183,32 @@ void ABaseCharacter::MoveInDirection(EAxis::Type Axis, const float Value)
 
 	// get forward vector
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(Axis);
-	AddMovementInput(Direction, Value);
-	OnMovementRequested(Value);
+
+	const FVector& Velocity = GetVelocity();
+	const float VectorLength = Velocity.Size();
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.33f, FColor::Red, FString::Printf(TEXT("Vel: %.1f"), Value));
+	}	
+
+	// We want to limit the acceleration depending on the value.
+	//if (Value > 0.0f && Value <= 0.5f)
+	//{
+	//	// 50% Tilt, clamp to walk.
+
+	//	if (VectorLength >= WalkSpeed)
+	//	{
+	//		SetVelocity(WalkSpeed);
+	//	}
+	//	else
+	//	{
+	//		AddMovementInput(Direction, Value);
+	//	}
+	//}
+	//else
+	{
+		AddMovementInput(Direction, Value);
+	}
 }
 
 void ABaseCharacter::MoveForward(float Value)
@@ -245,7 +242,6 @@ void ABaseCharacter::LookUpAtRate(float Rate)
 		return;
 	}
 
-
 	const float DeltaSeconds = World->GetDeltaSeconds();
 	const float PitchInput = Rate * BaseLookUpRate * DeltaSeconds;
 
@@ -277,57 +273,6 @@ UBaseCharacterAnimationInstance* ABaseCharacter::GetAnimInstance() const
 	return AnimInstance;
 }
 
-void ABaseCharacter::OnMovementRequested(float Value)
-{
-	UCharacterMovementComponent* CharMover = GetCharacterMovement();
-	if (!CharMover)
-	{
-		ResetAnimationMovement();
-		return;
-	}
-
-	//const FVector& Velocity = CharMover->GetLastUpdateVelocity();
-	//const float Speed = Velocity.Size();
-	//
-	//if (Speed > 0.0f)
-	//{
-	//	if (Speed >= 0.5f)
-	//	{
-	//		SetRunning(true);
-	//	}
-	//	else
-	//	{
-	//		SetWalking(true);
-	//	}
-	//}
-	//else
-	//{
-	//	ResetAnimationMovement();
-	//}
-}
-
-void ABaseCharacter::SetWalking(bool Value)
-{
-	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	AnimInstance->SetWalking(Value);
-}
-
-void ABaseCharacter::SetRunning(bool Value)
-{
-	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	AnimInstance->SetRunning(Value);
-}
-
 void ABaseCharacter::SetHiding(bool Value)
 {
 	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
@@ -339,9 +284,15 @@ void ABaseCharacter::SetHiding(bool Value)
 	AnimInstance->SetHiding(Value);
 }
 
-void ABaseCharacter::ResetAnimationMovement()
+void ABaseCharacter::SetVelocity(const float Value)
 {
-	SetWalking(false);
-	SetRunning(false);
-}
+	UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement();
+	if (!CharacterMovementComp)
+	{
+		return;
+	}
 
+	FVector NewVelocity = CharacterMovementComp->Velocity.GetSafeNormal();
+	NewVelocity *= Value;
+	CharacterMovementComp->Velocity = NewVelocity;
+}

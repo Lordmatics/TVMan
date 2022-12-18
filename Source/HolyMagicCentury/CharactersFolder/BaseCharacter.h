@@ -57,11 +57,9 @@ private:
 	virtual void AddControllerPitchInput(float Value) override;
 	
 	UBaseCharacterAnimationInstance* GetAnimInstance() const;
-	void OnMovementRequested(float Value);
-	void SetWalking(bool Value);
-	void SetRunning(bool Value);
 	void SetHiding(bool Value);
-	void ResetAnimationMovement();
+
+	void SetVelocity(const float Value);
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
@@ -75,6 +73,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float BaseLookUpRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		float WalkSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		float RunSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
