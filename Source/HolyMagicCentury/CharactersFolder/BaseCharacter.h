@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include <UObject/NoExportTypes.h>
+#include "HolyMagicCentury/CharactersFolder/CrouchData.h"
 #include "BaseCharacter.generated.h"
 
 class UInputComponent;
@@ -31,6 +32,8 @@ public:
 
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return ThirdPersonSpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return ThirdPersonCamera; }
+	FORCEINLINE const FCrouchData& GetCrouchData() const { return CrouchDataPacket; }
+	FORCEINLINE FCrouchData& GetCrouchData() { return CrouchDataPacket; }
 
 	virtual void Jump() override;	
 	virtual void StopJumping() override;
@@ -99,5 +102,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float RunSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		FCrouchData CrouchDataPacket;
 
 };

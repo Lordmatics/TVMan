@@ -24,8 +24,7 @@ void UHideActionData::InitialiseObject()
 
 UHideAction::UHideAction() :
 	PreviousVelocity(150.0f),
-	JumpVelocity(300.0f),
-	PreviousCapsuleHeight(100.0f)
+	JumpVelocity(300.0f)
 {
 	Blacklist.Push(ActionNames::LeapAction);
 	Blacklist.Push(ActionNames::JumpAction);	
@@ -55,24 +54,8 @@ void UHideAction::InitialiseAction(UActionDataBase* ActionDataBase)
 		if (UCharacterMovementComponent* CharacterMovementComponent = BaseCharacter->GetCharacterMovement())
 		{
 			const float GravityScale = CharacterMovementComponent->GravityScale;
-			PreviousVelocity = CharacterMovementComponent->JumpZVelocity;// *GravityScale;
+			PreviousVelocity = CharacterMovementComponent->JumpZVelocity;
 			CharacterMovementComponent->JumpZVelocity = JumpVelocity * GravityScale;
-		}
-
-		if (UCapsuleComponent* Capsule = BaseCharacter->GetCapsuleComponent())
-		{
-			if (USkeletalMeshComponent* MeshComp = BaseCharacter->GetMesh())
-			{				
-				// Increase Mesh Z by the same amount.
-				PreviousCapsuleHeight = Capsule->GetScaledCapsuleHalfHeight();
-				const float NewHalfHeight = PreviousCapsuleHeight * 0.5f;
-
-				FVector MeshLocation = MeshComp->GetComponentLocation();
-				MeshLocation.Z += NewHalfHeight;
-				MeshComp->SetWorldLocation(MeshLocation);
-
-				Capsule->SetCapsuleHalfHeight(NewHalfHeight, true);
-			}
 		}
 	}
 }
@@ -115,21 +98,6 @@ void UHideAction::OnActionDestroyed()
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 	{
 		AnimInstance->SetHiding(false);
-	}
-
-	if (UCapsuleComponent* Capsule = BaseCharacter->GetCapsuleComponent())
-	{
-		if (USkeletalMeshComponent* MeshComp = BaseCharacter->GetMesh())
-		{
-			// Decrease Mesh Z by the same amount.
-			const float NewHalfHeight = PreviousCapsuleHeight * 0.5f;
-
-			FVector MeshLocation = MeshComp->GetComponentLocation();
-			MeshLocation.Z -= NewHalfHeight;
-			MeshComp->SetWorldLocation(MeshLocation);
-
-			Capsule->SetCapsuleHalfHeight(PreviousCapsuleHeight, true);
-		}
 	}
 }
 

@@ -1,6 +1,5 @@
 // Lordmatics Games December 2022
 
-
 #include "HolyMagicCentury/CharactersFolder/BaseCharacter.h"
 #include <Camera/CameraComponent.h>
 #include <GameFramework/SpringArmComponent.h>
@@ -18,7 +17,7 @@
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
 	WalkSpeed(300.0f),
-	RunSpeed(600.0f)
+	RunSpeed(600.0f)	
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -27,6 +26,8 @@ ABaseCharacter::ABaseCharacter() :
 	{
 		Capsule->InitCapsuleSize(42.0f, 96.0f);
 	}
+
+	CrouchDataPacket = FCrouchData(GetCapsuleComponent(), GetMesh());
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
