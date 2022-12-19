@@ -50,6 +50,7 @@ public:
 
 	virtual const FName GetActionName() const { return ActionNames::LeapAction; }
 
+	virtual void CancelAction() override;
 private:
 
 	/*UPROPERTY(EditAnywhere, Category = "Test")
@@ -57,4 +58,5 @@ private:
 
 	float Timer;
 	float ProcessDelayTime;
+	float Expiration;
 };

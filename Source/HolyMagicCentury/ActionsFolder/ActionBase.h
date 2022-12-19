@@ -39,6 +39,8 @@ public:
 	virtual void OnLanded(const FHitResult& Hit) {}
 
 	virtual const FName GetActionName() const PURE_VIRTUAL(UActionBase::OnActionDestroyed(), return TEXT("None"););
+
+	virtual void CancelAction() {}
 private:
 
 protected:

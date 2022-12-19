@@ -12,7 +12,8 @@
 ULeapAction::ULeapAction() :
 	Super(),
 	Timer(0.0f),
-	ProcessDelayTime(0.8f)
+	ProcessDelayTime(0.8f),
+	Expiration(7.5f)
 {
 	Blacklist.Push(ActionNames::JumpAction);
 	Blacklist.Push(ActionNames::HideAction);
@@ -53,6 +54,12 @@ void ULeapAction::OnActionProcess(const float DeltaTime)
 	Timer += DeltaTime;
 	if (Timer <= ProcessDelayTime)
 	{
+		return;
+	}
+
+	if (Timer >= Expiration)
+	{
+		CancelAction();
 		return;
 	}
 
@@ -134,6 +141,11 @@ void ULeapAction::OnActionDestroyed()
 void ULeapAction::OnLanded(const FHitResult& Hit)
 {
 	// Determine when the leap should finish. Do a raycast down
+	CancelAction();
+}
+
+void ULeapAction::CancelAction()
+{
 	UObject* Owner = GetOuter();
 	if (!Owner)
 	{
