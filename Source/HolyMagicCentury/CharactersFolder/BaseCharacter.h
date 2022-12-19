@@ -34,6 +34,11 @@ public:
 	FORCEINLINE UCameraComponent* GetCamera() const { return ThirdPersonCamera; }
 	FORCEINLINE const FCrouchData& GetCrouchData() const { return CrouchDataPacket; }
 	FORCEINLINE FCrouchData& GetCrouchData() { return CrouchDataPacket; }
+	FORCEINLINE float GetDefaultGravity() const { return InitialGravityScale	; }
+	FORCEINLINE float IsMovementDisabled() const { return bMovementDisabled; }
+	FORCEINLINE float IsRotationDisabled() const { return bRotationDisabled; }
+	FORCEINLINE void SetMovementDisabled(bool Value) { bMovementDisabled = Value; }
+	FORCEINLINE void SetRotationDisabled(bool Value) { bRotationDisabled = Value; }
 
 	virtual void Jump() override;	
 	virtual void StopJumping() override;
@@ -91,10 +96,19 @@ private:
 		UActionManager* ActionManager;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		float InitialGravityScale;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float BaseTurnRate;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float BaseLookUpRate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		bool bMovementDisabled;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		bool bRotationDisabled;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float WalkSpeed;

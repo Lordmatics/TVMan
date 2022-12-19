@@ -18,7 +18,10 @@
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
 	WalkSpeed(300.0f),
-	RunSpeed(600.0f)	
+	RunSpeed(600.0f),
+	InitialGravityScale(1.0f),
+	bMovementDisabled(false),
+	bRotationDisabled(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -105,6 +108,8 @@ void ABaseCharacter::BeginPlay()
 	{
 		CharacterMovementComp->MaxWalkSpeed = RunSpeed;				
 		const float GravityScale = CharacterMovementComp->GravityScale;
+		InitialGravityScale = GravityScale;
+
 		const float JumpVel = CharacterMovementComp->JumpZVelocity;
 		CharacterMovementComp->JumpZVelocity = JumpVel * GravityScale * 1.33f;
 	}	
@@ -169,6 +174,11 @@ void ABaseCharacter::MoveInDirection(EAxis::Type Axis, const float Value)
 		return;
 	}
 
+	if (bMovementDisabled)
+	{
+		return;
+	}
+
 	// find out which way is forward
 	const FRotator& Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -194,6 +204,11 @@ void ABaseCharacter::MoveRight(float Value)
 
 void ABaseCharacter::TurnAtRate(float Rate)
 {
+	if (bRotationDisabled)
+	{
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (!World)
 	{
@@ -207,6 +222,11 @@ void ABaseCharacter::TurnAtRate(float Rate)
 
 void ABaseCharacter::LookUpAtRate(float Rate)
 {
+	if (bRotationDisabled)
+	{
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (!World)
 	{
@@ -221,11 +241,21 @@ void ABaseCharacter::LookUpAtRate(float Rate)
 
 void ABaseCharacter::AddControllerYawInput(float Value)
 {
+	if (bRotationDisabled)
+	{
+		return;
+	}
+
 	APawn::AddControllerYawInput(Value);
 }
 
 void ABaseCharacter::AddControllerPitchInput(float Value)
 {
+	if (bRotationDisabled)
+	{
+		return;
+	}
+
 	Value *= -1.0f;
 	APawn::AddControllerPitchInput(Value);
 }
