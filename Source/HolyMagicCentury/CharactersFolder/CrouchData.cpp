@@ -10,7 +10,9 @@ FCrouchData::FCrouchData() :
 	bIsCrouched(false),
 	StandingHalfHeight(96.0f),
 	CrouchedHalfHeight(48.0f),
-	MeshOffsetZ(48.0f)
+	MeshOffsetZ(48.0f),
+	LerpRatio(0.0f),
+	CachedMeshLocationZ(0.0f)
 {
 
 }
@@ -18,7 +20,8 @@ FCrouchData::FCrouchData() :
 FCrouchData::FCrouchData(UCapsuleComponent* Capsule, USkeletalMeshComponent* SkeletalMesh) :
 	CapsuleComponent(Capsule),
 	Mesh(SkeletalMesh),
-	bIsCrouched(false)
+	bIsCrouched(false),
+	LerpRatio(0.0f)
 {
 	if (!Capsule || !SkeletalMesh)
 	{
@@ -28,6 +31,7 @@ FCrouchData::FCrouchData(UCapsuleComponent* Capsule, USkeletalMeshComponent* Ske
 	StandingHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
 	CrouchedHalfHeight = StandingHalfHeight * 0.5f;
 	MeshOffsetZ = StandingHalfHeight - CrouchedHalfHeight;
+	CachedMeshLocationZ = SkeletalMesh->GetComponentLocation().Z;
 }
 
 void FCrouchData::ToggleCrouch()
@@ -73,4 +77,47 @@ void FCrouchData::UnCrouchInstant()
 void FCrouchData::SetCrouched(bool Value)
 {
 	bIsCrouched = Value;
+}
+
+void FCrouchData::LerpCrouch(float NewHalfHeight)
+{
+	if (!CapsuleComponent || !Mesh)
+	{
+		return;
+	}
+
+	int OffsetMod = 1;
+	float LerpedMeshOffsetZ = MeshOffsetZ;
+	if (bIsCrouched)
+	{
+		// Adding
+		OffsetMod = -1;
+		// 48, blending to 96
+		// so 50 - 48 = 2
+		LerpedMeshOffsetZ = NewHalfHeight - CrouchedHalfHeight;
+	}
+	else
+	{
+		// Subtracting
+		LerpedMeshOffsetZ = StandingHalfHeight - NewHalfHeight;
+	}
+	
+	//LerpedMeshOffsetZ *= 2;
+
+	CapsuleComponent->SetCapsuleHalfHeight(NewHalfHeight, false);
+	float StartZLocation = CachedMeshLocationZ;
+	StartZLocation += (LerpedMeshOffsetZ * OffsetMod);
+	FVector MeshLocation = Mesh->GetRelativeLocation();
+	MeshLocation.Z = StartZLocation;
+	Mesh->SetRelativeLocation(MeshLocation);
+}
+
+void FCrouchData::CacheMeshLocation()
+{
+	if (!CapsuleComponent || !Mesh)
+	{
+		return;
+	}
+
+	CachedMeshLocationZ = Mesh->GetRelativeLocation().Z;
 }

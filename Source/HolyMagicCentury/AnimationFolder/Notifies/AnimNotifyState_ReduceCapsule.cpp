@@ -7,7 +7,7 @@
 
 UAnimNotifyState_ReduceCapsule::UAnimNotifyState_ReduceCapsule() :
 	Super(),
-	HalfHeightRatio(1.0f)
+	LerpSpeed(3.0f)
 {
 
 }
@@ -28,7 +28,8 @@ void UAnimNotifyState_ReduceCapsule::NotifyBegin(USkeletalMeshComponent* MeshCom
 	}
 
 	FCrouchData& CrouchData = BaseCharacter->GetCrouchData();
-	CrouchData.ToggleCrouch();	
+	CrouchData.LerpRatio = 0.0f;
+	CrouchData.CacheMeshLocation();
 }
 
 void UAnimNotifyState_ReduceCapsule::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime)
@@ -40,28 +41,59 @@ void UAnimNotifyState_ReduceCapsule::NotifyTick(USkeletalMeshComponent* MeshComp
 		return;
 	}
 
-	//UCapsuleComponent* CapsuleComponent = GetCapsule(*MeshComp);
-	//if (!CapsuleComponent)
-	//{
-	//	return;
-	//}
+	ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(MeshComp->GetOwner());
+	if (!BaseCharacter)
+	{
+		return;
+	}
 
-	//// Increase Mesh Z by the same amount.
-	//PreviousCapsuleHeight = CapsuleComponent->GetScaledCapsuleHalfHeight();
-	//const float NewHalfHeight = PreviousCapsuleHeight * 0.5f;
-
-	//FVector MeshLocation = MeshComp->GetComponentLocation();
-	//MeshLocation.Z += NewHalfHeight;
-	//MeshComp->SetWorldLocation(MeshLocation);
-
-	//Capsule->SetCapsuleHalfHeight(NewHalfHeight, true);
-	//// Blend HalfHeight between two values.
-	//// Adjust Mesh by the same ratio.
+	FCrouchData& CrouchData = BaseCharacter->GetCrouchData();
+	float& LerpRatio = CrouchData.LerpRatio;
+	const float CrouchedHalfHeight = CrouchData.CrouchedHalfHeight;
+	const float StandingHalfHeight = CrouchData.StandingHalfHeight;
+	
+	if (CrouchData.bIsCrouched)
+	{
+		// Lerp from crouched -> uncrouched.
+		LerpRatio += FrameDeltaTime * LerpSpeed;
+		LerpRatio = FMath::Clamp(LerpRatio, 0.0f, 1.0f);
+		float NewHalfHeight = FMath::Lerp(CrouchedHalfHeight, StandingHalfHeight, LerpRatio);
+		CrouchData.LerpCrouch(NewHalfHeight);
+	}
+	else
+	{
+		// Lerp from uncrouched to crouched.
+		LerpRatio += FrameDeltaTime * LerpSpeed;
+		LerpRatio = FMath::Clamp(LerpRatio, 0.0f, 1.0f);
+		float NewHalfHeight = FMath::Lerp(StandingHalfHeight, CrouchedHalfHeight, LerpRatio);
+		CrouchData.LerpCrouch(NewHalfHeight);
+	}
 }
 
 void UAnimNotifyState_ReduceCapsule::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	Super::NotifyEnd(MeshComp, Animation);
+
+	if (!MeshComp)
+	{
+		return;
+	}
+
+	ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(MeshComp->GetOwner());
+	if (!BaseCharacter)
+	{
+		return;
+	}
+
+	FCrouchData& CrouchData = BaseCharacter->GetCrouchData();
+	if (CrouchData.bIsCrouched)
+	{
+		CrouchData.SetCrouched(false);
+	}
+	else
+	{
+		CrouchData.SetCrouched(true);
+	}
 }
 
 UCapsuleComponent* UAnimNotifyState_ReduceCapsule::GetCapsule(const USkeletalMeshComponent& MeshComp) const

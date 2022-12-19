@@ -30,8 +30,8 @@ private:
 private:
 
 	/*
-	*	How much should the half height be scale by during the course of this animation.	
+	*	Higher this is, the faster the transition. 
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation", meta = (AllowPrivateAccess = "true"))
-	float HalfHeightRatio;
+	float LerpSpeed;
 };

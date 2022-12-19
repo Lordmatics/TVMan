@@ -36,8 +36,16 @@ public:
 	UPROPERTY(Transient)
 	float MeshOffsetZ;
 
+	UPROPERTY(Transient)
+	float LerpRatio;
+
+	UPROPERTY(Transient)
+	float CachedMeshLocationZ;
+
 	void ToggleCrouch();
 	void CrouchInstant();
 	void UnCrouchInstant();
 	void SetCrouched(bool Value);
+	void LerpCrouch(float NewHalfHeight);
+	void CacheMeshLocation();
 };
