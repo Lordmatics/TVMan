@@ -17,11 +17,12 @@
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
-	WalkSpeed(300.0f),
-	RunSpeed(600.0f),
 	InitialGravityScale(1.0f),
+	InitialJumpVelocity(600.0f),
 	bMovementDisabled(false),
-	bRotationDisabled(false)
+	bRotationDisabled(false),
+	WalkSpeed(300.0f),
+	RunSpeed(600.0f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -112,6 +113,7 @@ void ABaseCharacter::BeginPlay()
 
 		const float JumpVel = CharacterMovementComp->JumpZVelocity;
 		CharacterMovementComp->JumpZVelocity = JumpVel * GravityScale * 1.33f;
+		InitialJumpVelocity = JumpVel * GravityScale * 1.33f;
 	}	
 }
 
@@ -122,11 +124,22 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 	if (ActionManager)
 	{
+		// Return to most recent action ?
 		const bool bProcessSuccess = ActionManager->Process(DeltaTime);
 		if (!bProcessSuccess)
 		{
-			UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
-			ActionManager->RequestAction(ActionNames::DefaultAction, ActionData);
+			// TODO: See if i can streamline this later.
+			const FName& LastKnownActionName = ActionManager->GetLastKnownDefaultAction();
+			if (LastKnownActionName == ActionNames::DefaultAction)
+			{
+				UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
+				ActionManager->RequestAction(ActionNames::DefaultAction, ActionData);
+			}
+			else if (LastKnownActionName == ActionNames::HideAction)
+			{
+				UHideActionData* ActionData = NewObject<UHideActionData>(this);
+				ActionManager->RequestAction(ActionNames::HideAction, ActionData);
+			}
 		}
 
 		if (GEngine)
@@ -260,6 +273,15 @@ void ABaseCharacter::AddControllerPitchInput(float Value)
 	APawn::AddControllerPitchInput(Value);
 }
 
+FName ABaseCharacter::GetLastKnownDefaultActionName() const
+{
+	if (ActionManager)
+	{
+		return ActionManager->GetLastKnownDefaultAction();
+	}
+	return NAME_None;
+}
+
 void ABaseCharacter::Jump()
 {
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
@@ -308,12 +330,17 @@ void ABaseCharacter::OnActionPressed()
 		const bool bIsFalling = CharacterMovementComp->IsFalling();
 		if (bIsFalling)
 		{
-			const bool bIsSlamming = ActionManager->IsCurrentAction(ActionNames::GroundSlamAction);
-			if (!bIsSlamming)
+			if (ActionManager)
 			{
-				UGroundSlamActionData* ActionData = NewObject<UGroundSlamActionData>(this);
-				ActionManager->RequestAction(ActionNames::GroundSlamAction, ActionData);
-			}		
+				const bool bIsSlamming = ActionManager->IsCurrentAction(ActionNames::GroundSlamAction);
+				if (!bIsSlamming)
+				{
+					const bool bHiding = ActionManager->IsCurrentAction(ActionNames::HideAction);					
+					UGroundSlamActionData* ActionData = NewObject<UGroundSlamActionData>(this);
+					ActionManager->RequestAction(ActionNames::GroundSlamAction, ActionData);
+				}
+			}
+	
 			return;
 		}
 	}

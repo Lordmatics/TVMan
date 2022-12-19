@@ -38,6 +38,12 @@ public:
 
 	using CreateActionFuncPtr = UActionBase* (*)(UActionDataBase* DataPtr, UObject* OuterObject);
 	static TMap<FName, CreateActionFuncPtr> MapActionTypes;
+
+	// Last Action Period.
+	FORCEINLINE const FName& GetLastKnownAction() const { return LastKnownAction; }
+	// Last Action that inherits Default (so basically any action we can idle back into)
+	FORCEINLINE const FName& GetLastKnownDefaultAction() const { return LastKnownDefaultAction; }
+
 private:
 
 	bool CreateActionFromName(const FName& ActionName, UActionDataBase* Data);
@@ -46,4 +52,6 @@ private:
 private:
 
 	TWeakObjectPtr<UActionBase> CurrentAction;
+	FName LastKnownAction;
+	FName LastKnownDefaultAction;
 };

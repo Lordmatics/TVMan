@@ -35,10 +35,12 @@ public:
 	FORCEINLINE const FCrouchData& GetCrouchData() const { return CrouchDataPacket; }
 	FORCEINLINE FCrouchData& GetCrouchData() { return CrouchDataPacket; }
 	FORCEINLINE float GetDefaultGravity() const { return InitialGravityScale	; }
+	FORCEINLINE float GetDefaultJumpVelocity() const { return InitialJumpVelocity; }
 	FORCEINLINE float IsMovementDisabled() const { return bMovementDisabled; }
 	FORCEINLINE float IsRotationDisabled() const { return bRotationDisabled; }
 	FORCEINLINE void SetMovementDisabled(bool Value) { bMovementDisabled = Value; }
 	FORCEINLINE void SetRotationDisabled(bool Value) { bRotationDisabled = Value; }
+	FName GetLastKnownDefaultActionName() const;
 
 	virtual void Jump() override;	
 	virtual void StopJumping() override;
@@ -97,6 +99,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float InitialGravityScale;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		float InitialJumpVelocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float BaseTurnRate;

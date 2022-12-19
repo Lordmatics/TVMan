@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "HolyMagicCentury/ActionsFolder/ActionBase.h"
+#include "DefaultAction.h"
 #include "HideAction.generated.h"
 
 /**
@@ -16,7 +17,7 @@ namespace ActionNames
 }
 
 UCLASS(EditInlineNew)
-class HOLYMAGICCENTURY_API UHideActionData : public UActionDataBase
+class HOLYMAGICCENTURY_API UHideActionData : public UDefaultActionData
 {
 	GENERATED_BODY()
 
@@ -31,7 +32,7 @@ private:
 };
 
 UCLASS(EditInlineNew)
-class HOLYMAGICCENTURY_API UHideAction : public UActionBase
+class HOLYMAGICCENTURY_API UHideAction : public UDefaultAction
 {
 	GENERATED_BODY()
 
@@ -54,6 +55,5 @@ public:
 
 private:
 
-	float PreviousVelocity;
 	float JumpVelocity;
 };

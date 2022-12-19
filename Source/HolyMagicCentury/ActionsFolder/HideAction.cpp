@@ -24,7 +24,6 @@ void UHideActionData::InitialiseObject()
 }
 
 UHideAction::UHideAction() :
-	PreviousVelocity(150.0f),
 	JumpVelocity(300.0f)
 {
 	Blacklist.Push(ActionNames::LeapAction);
@@ -40,6 +39,8 @@ UHideAction::~UHideAction()
 
 void UHideAction::InitialiseAction(UActionDataBase* ActionDataBase)
 {
+	Super::InitialiseAction(ActionDataBase);
+
 	UHideActionData* ActionData = Cast<UHideActionData>(ActionDataBase);
 	if (!ActionData)
 	{
@@ -49,6 +50,9 @@ void UHideAction::InitialiseAction(UActionDataBase* ActionDataBase)
 	UObject* Owner = GetOuter();
 	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner))
 	{		
+		const float DefaultGravityScale = BaseCharacter->GetDefaultGravity();
+		const float DefaultJumpVelocity = BaseCharacter->GetDefaultJumpVelocity();
+		const FName& LastKnownDefaultAction = BaseCharacter->GetLastKnownDefaultActionName();
 		if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 		{
 			AnimInstance->SetHiding(true);
@@ -56,25 +60,25 @@ void UHideAction::InitialiseAction(UActionDataBase* ActionDataBase)
 		
 		if (UCharacterMovementComponent* CharacterMovementComponent = BaseCharacter->GetCharacterMovement())
 		{
-			const float GravityScale = CharacterMovementComponent->GravityScale;
-			PreviousVelocity = CharacterMovementComponent->JumpZVelocity;
-			CharacterMovementComponent->JumpZVelocity = JumpVelocity * GravityScale;
+			CharacterMovementComponent->JumpZVelocity = JumpVelocity * DefaultGravityScale;	
 		}
 	}
 }
 
 void UHideAction::OnActionCreated()
 {
-
+	Super::OnActionCreated();
 }
 
 void UHideAction::OnActionProcess(const float DeltaTime)
 {
-
+	Super::OnActionProcess(DeltaTime);
 }
 
 void UHideAction::OnActionDestroyed()
 {
+	Super::OnActionDestroyed();
+
 	UObject* Owner = GetOuter();
 	if (!Owner)
 	{
@@ -93,9 +97,10 @@ void UHideAction::OnActionDestroyed()
 		return;
 	}
 
+	const float DefaultJumpVelocity = BaseCharacter->GetDefaultJumpVelocity();
 	if (UCharacterMovementComponent* CharacterMovementComponent = BaseCharacter->GetCharacterMovement())
 	{
-		CharacterMovementComponent->JumpZVelocity = PreviousVelocity;
+		CharacterMovementComponent->JumpZVelocity = DefaultJumpVelocity;
 	}
 
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
@@ -106,5 +111,5 @@ void UHideAction::OnActionDestroyed()
 
 void UHideAction::OnLanded(const FHitResult& Hit)
 {
-
+	Super::OnLanded(Hit);
 }

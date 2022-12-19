@@ -12,7 +12,9 @@
 TMap<FName, UActionManager::CreateActionFuncPtr> UActionManager::MapActionTypes;
 
 UActionManager::UActionManager() :
-	CurrentAction(nullptr)
+	CurrentAction(nullptr),
+	LastKnownAction(NAME_None),
+	LastKnownDefaultAction(NAME_None)
 {
 }
 
@@ -102,6 +104,11 @@ bool UActionManager::CreateActionFromName(const FName& ActionName, UActionDataBa
 	if (UActionBase* CreatedAction = FuncPtr(Data, OuterObject))
 	{
 		SetCurrentAction(CreatedAction);
+		LastKnownAction = ActionName;
+		if (UDefaultAction* DefaultAction = Cast<UDefaultAction>(CreatedAction))
+		{
+			LastKnownDefaultAction = ActionName;
+		}
 		return true;
 	}
 

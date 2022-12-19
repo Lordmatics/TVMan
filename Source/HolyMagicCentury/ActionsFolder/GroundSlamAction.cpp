@@ -8,6 +8,7 @@
 #include "JumpAction.h"
 #include "ActionManager.h"
 #include <DrawDebugHelpers.h>
+#include <GameFramework/CharacterMovementComponent.h>
 
 UGroundSlamActionData::UGroundSlamActionData()
 {
@@ -138,6 +139,12 @@ void UGroundSlamAction::OnActionDestroyed()
 	if (!BaseCharacter)
 	{
 		return;
+	}
+
+	const float DefaultGravity = BaseCharacter->GetDefaultGravity();
+	if (UCharacterMovementComponent* CharacterMovementComponent = BaseCharacter->GetCharacterMovement())
+	{
+		CharacterMovementComponent->GravityScale = DefaultGravity;
 	}
 
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
