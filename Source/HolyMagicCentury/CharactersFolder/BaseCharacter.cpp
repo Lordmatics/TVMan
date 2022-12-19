@@ -278,6 +278,12 @@ void ABaseCharacter::OnActionPressed()
 		const bool bIsFalling = CharacterMovementComp->IsFalling();
 		if (bIsFalling)
 		{
+			const bool bIsSlamming = ActionManager->IsCurrentAction(ActionNames::GroundSlamAction);
+			if (!bIsSlamming)
+			{
+				UGroundSlamActionData* ActionData = NewObject<UGroundSlamActionData>(this);
+				ActionManager->RequestAction(ActionNames::GroundSlamAction, ActionData);
+			}		
 			return;
 		}
 	}
@@ -293,17 +299,8 @@ void ABaseCharacter::OnActionPressed()
 		}
 		else
 		{
-			const bool bIsJumping = ActionManager->IsCurrentAction(ActionNames::JumpAction);
-			if (bIsJumping)
-			{								
-				UGroundSlamActionData* ActionData = NewObject<UGroundSlamActionData>(this);
-				ActionManager->RequestAction(ActionNames::GroundSlamAction, ActionData);	
-			}
-			else
-			{
-				UHideActionData* ActionData = NewObject<UHideActionData>(this);
-				ActionManager->RequestAction(ActionNames::HideAction, ActionData);
-			}
+			UHideActionData* ActionData = NewObject<UHideActionData>(this);
+			ActionManager->RequestAction(ActionNames::HideAction, ActionData);
 		}
 	}
 }

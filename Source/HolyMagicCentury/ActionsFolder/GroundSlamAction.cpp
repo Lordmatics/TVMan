@@ -7,6 +7,7 @@
 #include "HideAction.h"
 #include "JumpAction.h"
 #include "ActionManager.h"
+#include <DrawDebugHelpers.h>
 
 UGroundSlamActionData::UGroundSlamActionData()
 {
@@ -62,7 +63,61 @@ void UGroundSlamAction::OnActionCreated()
 
 void UGroundSlamAction::OnActionProcess(const float DeltaTime)
 {
+	//UObject* Owner = GetOuter();
+	//if (!Owner)
+	//{
+	//	return;
+	//}
 
+	//UWorld* World = Owner->GetWorld();
+	//if (!World)
+	//{
+	//	return;
+	//}
+
+	//ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner);
+	//if (!BaseCharacter)
+	//{
+	//	return;
+	//}
+
+	//FHitResult HitResult;
+	//const FVector& Start = BaseCharacter->GetActorLocation();
+	//const float RayLength = 100.0f;
+	//const FVector End = Start - FVector(0.0f, 0.0f, RayLength);
+	//FCollisionQueryParams QueryParams;
+	//QueryParams.AddIgnoredActor(BaseCharacter);
+	//
+	//const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_WorldDynamic, QueryParams);
+	//	
+	//bool bPersistent = true;
+	//float LifeTime = 0.0f;
+	//
+	//// @fixme, draw line with thickness = 2.f?
+	//if (bHit && HitResult.bBlockingHit)
+	//{
+	//	if (GEngine && HitResult.GetActor())
+	//	{
+	//		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
+	//	}
+	//		
+	//	// Red up to the blocking hit, green thereafter
+	//	DrawDebugLine(World, Start, HitResult.ImpactPoint, FLinearColor::Red.ToFColor(true), bPersistent, LifeTime);
+	//	DrawDebugLine(World, HitResult.ImpactPoint, End, FLinearColor::Green.ToFColor(true), bPersistent, LifeTime);
+	//	DrawDebugPoint(World, HitResult.ImpactPoint, 16.0f, FLinearColor::Red.ToFColor(true), bPersistent, LifeTime);
+	//}
+	//else
+	//{
+	//	// no hit means all red
+	//	DrawDebugLine(World, Start, End, FLinearColor::Red.ToFColor(true), bPersistent, LifeTime);
+	//}
+	//
+	//if (!bHit)
+	//{
+	//	return;
+	//}
+
+	//CancelAction();
 }
 
 void UGroundSlamAction::OnActionDestroyed()
