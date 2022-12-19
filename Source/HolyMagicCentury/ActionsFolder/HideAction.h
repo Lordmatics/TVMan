@@ -52,6 +52,7 @@ public:
 
 private:
 
+	float PreviousCapsuleHeight;
 	float PreviousVelocity;
 	float JumpVelocity;
 };

@@ -101,7 +101,10 @@ void ABaseCharacter::BeginPlay()
 
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
 	{
-		CharacterMovementComp->MaxWalkSpeed = RunSpeed;
+		CharacterMovementComp->MaxWalkSpeed = RunSpeed;				
+		const float GravityScale = CharacterMovementComp->GravityScale;
+		const float JumpVel = CharacterMovementComp->JumpZVelocity;
+		CharacterMovementComp->JumpZVelocity = JumpVel * GravityScale * 1.33f;
 	}	
 }
 
