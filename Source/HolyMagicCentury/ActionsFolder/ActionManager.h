@@ -11,6 +11,9 @@ class UActionDataBase;
 /**
  * 
  */
+
+//typedef void (*FuncPtr)() Func;
+
 UCLASS()
 class HOLYMAGICCENTURY_API UActionManager : public UObject
 {
@@ -35,6 +38,10 @@ public:
 
 	void OnLanded(const FHitResult& Hit);
 
+	//using FuncPtr = void(*)();
+
+	//typedef UActionBase* (*Func)() ;
+	static TMap<FName, UActionBase* (*)(UActionDataBase* DataPtr, UObject* OuterObject)> MapActionTypes;
 private:
 
 	bool CreateActionFromName(const FName& ActionName, UActionDataBase* Data);

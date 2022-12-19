@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "HolyMagicCentury/ActionsFolder/ActionBase.h"
-#include "JumpAction.generated.h"
+#include "GroundSlamAction.generated.h"
 
 /**
  *
@@ -12,17 +12,17 @@
 
 namespace ActionNames
 {
-	const FName JumpAction = FName(TEXT("JumpAction"));
+	const FName GroundSlamAction = FName(TEXT("GroundSlamAction"));
 }
 
 UCLASS(EditInlineNew)
-class HOLYMAGICCENTURY_API UJumpActionData : public UActionDataBase
+class HOLYMAGICCENTURY_API UGroundSlamActionData : public UActionDataBase
 {
 	GENERATED_BODY()
 
 public:
-	UJumpActionData();
-	virtual ~UJumpActionData();
+	UGroundSlamActionData();
+	virtual ~UGroundSlamActionData();
 
 	virtual void InitialiseObject() override;
 
@@ -31,16 +31,16 @@ private:
 };
 
 UCLASS(EditInlineNew)
-class HOLYMAGICCENTURY_API UJumpAction : public UActionBase
+class HOLYMAGICCENTURY_API UGroundSlamAction : public UActionBase
 {
 	GENERATED_BODY()
 
 public:
 
-	RegisterCreateFunction(UJumpAction, UJumpActionData);
+	RegisterCreateFunction(UGroundSlamAction, UGroundSlamActionData);
 
-	UJumpAction();
-	virtual ~UJumpAction();
+	UGroundSlamAction();
+	virtual ~UGroundSlamAction();
 
 	virtual void InitialiseAction(UActionDataBase* ActionDataBase) override;
 
@@ -48,11 +48,12 @@ public:
 	virtual void OnActionProcess(const float DeltaTime) override;
 	virtual void OnActionDestroyed() override;
 
-	virtual void OnLanded(const FHitResult& Hit);
+	virtual void OnLanded(const FHitResult& HitResult) override;
 
-	virtual const FName GetActionName() const { return ActionNames::JumpAction; }
+	virtual const FName GetActionName() const { return ActionNames::GroundSlamAction; }
 
 	virtual void CancelAction() override;
+	
 private:
 
 };

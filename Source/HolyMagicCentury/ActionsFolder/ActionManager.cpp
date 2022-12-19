@@ -7,6 +7,16 @@
 #include "DefaultAction.h"
 #include "HideAction.h"
 #include "JumpAction.h"
+#include "GroundSlamAction.h"
+
+#define SetupActionMacro(DataClass, ActionClass, DataPtr, OuterObject)\
+	DataClass* ActionData = Cast<DataClass>(DataPtr);\
+	ActionClass* NewAction = NewObject<ActionClass>(OuterObject);\
+	NewAction->InitialiseAction(ActionData);\
+	SetCurrentAction(NewAction);\
+
+//TMap<FName, TPair<UActionBase*, UActionDataBase*>> UActionManager::MapActionTypes;
+TMap<FName, UActionBase* (*)(UActionDataBase* DataPtr, UObject* OuterObject)> UActionManager::MapActionTypes;
 
 UActionManager::UActionManager() :
 	CurrentAction(nullptr)
@@ -94,38 +104,16 @@ bool UActionManager::CreateActionFromName(const FName& ActionName, UActionDataBa
 
 	Data->InitialiseObject();
 
-	if (ActionName == ActionNames::DefaultAction)
+	// Get Static Create Function mapped to action name.
+	auto FuncPtr = MapActionTypes[ActionName];
+	if (UActionBase* CreatedAction = FuncPtr(Data, OuterObject))
 	{
-		UDefaultActionData* DefaultData = Cast<UDefaultActionData>(Data);
-		UDefaultAction* DefaultAction = NewObject<UDefaultAction>(OuterObject);
-		DefaultAction->InitialiseAction(DefaultData);
-		SetCurrentAction(DefaultAction);
+		SetCurrentAction(CreatedAction);
 		return true;
 	}
-	else if (ActionName == ActionNames::LeapAction)
-	{
-		ULeapActionData* LeapData = Cast<ULeapActionData>(Data);
-		ULeapAction* LeapAction = NewObject<ULeapAction>(OuterObject);
-		LeapAction->InitialiseAction(LeapData);
-		SetCurrentAction(LeapAction);		
-		return true;
-	}
-	else if (ActionName == ActionNames::HideAction)
-	{
-		UHideActionData* ActionData = Cast<UHideActionData>(Data);
-		UHideAction* NewAction = NewObject<UHideAction>(OuterObject);
-		NewAction->InitialiseAction(ActionData);
-		SetCurrentAction(NewAction);
-		return true;
-	}
-	else if (ActionName == ActionNames::JumpAction)
-	{
-		UJumpActionData* ActionData = Cast<UJumpActionData>(Data);
-		UJumpAction* NewAction = NewObject<UJumpAction>(OuterObject);
-		NewAction->InitialiseAction(ActionData);
-		SetCurrentAction(NewAction);
-		return true;
-	}
+
+	// If this is hit, you forgot to add critical macros to your new action.
+	checkNoEntry();
 	return false;
 }
 

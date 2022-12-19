@@ -37,6 +37,8 @@ class HOLYMAGICCENTURY_API UDefaultAction : public UActionBase
 
 public:
 
+	RegisterCreateFunction(UDefaultAction, UDefaultActionData);
+
 	UDefaultAction();
 	virtual ~UDefaultAction();
 

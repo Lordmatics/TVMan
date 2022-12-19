@@ -1,6 +1,7 @@
 // Lordmatics Games December 2022
 
 #include "HolyMagicCentury/ActionsFolder/DefaultAction.h"
+#include "ActionManager.h"
 
 UDefaultActionData::UDefaultActionData()
 {
@@ -18,8 +19,8 @@ void UDefaultActionData::InitialiseObject()
 }
 
 UDefaultAction::UDefaultAction()
-{
-
+{	
+	RegisterActionToManager(ActionNames::DefaultAction, UDefaultAction);
 }
 
 UDefaultAction::~UDefaultAction()

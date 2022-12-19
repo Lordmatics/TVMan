@@ -8,6 +8,7 @@
 #include <DrawDebugHelpers.h>
 #include "HideAction.h"
 #include "JumpAction.h"
+#include "ActionManager.h"
 
 ULeapAction::ULeapAction() :
 	Super(),
@@ -17,6 +18,8 @@ ULeapAction::ULeapAction() :
 {
 	Blacklist.Push(ActionNames::JumpAction);
 	Blacklist.Push(ActionNames::HideAction);
+	
+	RegisterActionToManager(ActionNames::LeapAction, ULeapAction);
 }
 
 ULeapAction::~ULeapAction()

@@ -37,6 +37,8 @@ class HOLYMAGICCENTURY_API UHideAction : public UActionBase
 
 public:
 
+	RegisterCreateFunction(UHideAction, UHideActionData);
+
 	UHideAction();
 	virtual ~UHideAction();
 

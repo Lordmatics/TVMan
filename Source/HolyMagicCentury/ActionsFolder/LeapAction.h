@@ -37,6 +37,8 @@ class HOLYMAGICCENTURY_API ULeapAction : public UActionBase
 
 public:
 
+	RegisterCreateFunction(ULeapAction, ULeapActionData);
+
 	ULeapAction();
 	virtual ~ULeapAction();	
 
@@ -51,10 +53,8 @@ public:
 	virtual const FName GetActionName() const { return ActionNames::LeapAction; }
 
 	virtual void CancelAction() override;
-private:
 
-	/*UPROPERTY(EditAnywhere, Category = "Test")
-		float TestLeap;*/
+private:
 
 	float Timer;
 	float ProcessDelayTime;

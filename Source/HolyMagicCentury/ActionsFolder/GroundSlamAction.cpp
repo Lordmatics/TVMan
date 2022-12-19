@@ -1,43 +1,45 @@
 // Lordmatics Games December 2022
-#include "HolyMagicCentury/ActionsFolder/JumpAction.h"
+#include "HolyMagicCentury/ActionsFolder/GroundSlamAction.h"
 #include "HolyMagicCentury/CharactersFolder/BaseCharacter.h"
 #include "HolyMagicCentury/AnimationFolder/BaseCharacterAnimationInstance.h"
 #include <Engine/World.h>
 #include "LeapAction.h"
 #include "HideAction.h"
+#include "JumpAction.h"
 #include "ActionManager.h"
 
-UJumpActionData::UJumpActionData()
+UGroundSlamActionData::UGroundSlamActionData()
 {
 
 }
 
-UJumpActionData::~UJumpActionData()
+UGroundSlamActionData::~UGroundSlamActionData()
 {
 
 }
 
-void UJumpActionData::InitialiseObject()
+void UGroundSlamActionData::InitialiseObject()
 {
 	Super::InitialiseObject();
 }
 
-UJumpAction::UJumpAction()
+UGroundSlamAction::UGroundSlamAction()
 {
 	Blacklist.Push(ActionNames::LeapAction);
 	Blacklist.Push(ActionNames::HideAction);
+	Blacklist.Push(ActionNames::JumpAction);
 
-	RegisterActionToManager(ActionNames::JumpAction, UJumpAction);
+	RegisterActionToManager(ActionNames::GroundSlamAction, UGroundSlamAction);
 }
 
-UJumpAction::~UJumpAction()
+UGroundSlamAction::~UGroundSlamAction()
 {
 
 }
 
-void UJumpAction::InitialiseAction(UActionDataBase* ActionDataBase)
+void UGroundSlamAction::InitialiseAction(UActionDataBase* ActionDataBase)
 {
-	UJumpActionData* ActionData = Cast<UJumpActionData>(ActionDataBase);
+	UGroundSlamActionData* ActionData = Cast<UGroundSlamActionData>(ActionDataBase);
 	if (!ActionData)
 	{
 		return;
@@ -48,22 +50,22 @@ void UJumpAction::InitialiseAction(UActionDataBase* ActionDataBase)
 	{
 		if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 		{
-			
+			AnimInstance->SetGroundSlamming(true);
 		}		
 	}
 }
 
-void UJumpAction::OnActionCreated()
+void UGroundSlamAction::OnActionCreated()
 {
 
 }
 
-void UJumpAction::OnActionProcess(const float DeltaTime)
+void UGroundSlamAction::OnActionProcess(const float DeltaTime)
 {
 
 }
 
-void UJumpAction::OnActionDestroyed()
+void UGroundSlamAction::OnActionDestroyed()
 {
 	UObject* Owner = GetOuter();
 	if (!Owner)
@@ -85,16 +87,16 @@ void UJumpAction::OnActionDestroyed()
 
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 	{
-		
+		AnimInstance->SetGroundSlamming(false);
 	}
 }
 
-void UJumpAction::OnLanded(const FHitResult& Hit)
+void UGroundSlamAction::OnLanded(const FHitResult& HitResult)
 {
-	//CancelAction();
+	CancelAction();
 }
 
-void UJumpAction::CancelAction()
+void UGroundSlamAction::CancelAction()
 {
 	UObject* Owner = GetOuter();
 	if (!Owner)
@@ -116,6 +118,6 @@ void UJumpAction::CancelAction()
 
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 	{
-		
+		AnimInstance->SetGroundSlamming(false);
 	}
 }

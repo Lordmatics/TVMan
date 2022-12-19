@@ -6,6 +6,7 @@
 #include "LeapAction.h"
 #include "JumpAction.h"
 #include <Components/CapsuleComponent.h>
+#include "ActionManager.h"
 
 UHideActionData::UHideActionData()
 {
@@ -27,7 +28,9 @@ UHideAction::UHideAction() :
 	JumpVelocity(300.0f)
 {
 	Blacklist.Push(ActionNames::LeapAction);
-	Blacklist.Push(ActionNames::JumpAction);	
+	Blacklist.Push(ActionNames::JumpAction);
+
+	RegisterActionToManager(ActionNames::HideAction, UHideAction);
 }
 
 UHideAction::~UHideAction()

@@ -24,6 +24,9 @@ public:
 	FORCEINLINE void SetLeaping(bool Value) { bIsLeaping = Value; }
 	FORCEINLINE bool IsLeaping() const { return bIsLeaping; }
 	
+	FORCEINLINE void SetGroundSlamming(bool Value) { bIsGroundSlamming = Value; }
+	FORCEINLINE bool IsGroundSlamming() const { return bIsGroundSlamming; }
+
 private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
@@ -31,4 +34,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	bool bIsLeaping;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	bool bIsGroundSlamming;
 };

@@ -13,6 +13,7 @@
 #include "../ActionsFolder/DefaultAction.h"
 #include "../ActionsFolder/HideAction.h"
 #include "../ActionsFolder/JumpAction.h"
+#include "../ActionsFolder/GroundSlamAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
@@ -292,8 +293,17 @@ void ABaseCharacter::OnActionPressed()
 		}
 		else
 		{
-			UHideActionData* ActionData = NewObject<UHideActionData>(this);
-			ActionManager->RequestAction(ActionNames::HideAction, ActionData);
+			const bool bIsJumping = ActionManager->IsCurrentAction(ActionNames::JumpAction);
+			if (bIsJumping)
+			{								
+				UGroundSlamActionData* ActionData = NewObject<UGroundSlamActionData>(this);
+				ActionManager->RequestAction(ActionNames::GroundSlamAction, ActionData);	
+			}
+			else
+			{
+				UHideActionData* ActionData = NewObject<UHideActionData>(this);
+				ActionManager->RequestAction(ActionNames::HideAction, ActionData);
+			}
 		}
 	}
 }

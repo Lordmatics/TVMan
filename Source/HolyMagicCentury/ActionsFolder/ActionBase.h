@@ -5,6 +5,19 @@
 #include "CoreMinimal.h"
 #include "ActionBase.generated.h"
 
+#define RegisterActionToManager(ActionName, ClassName) \
+	TTuple<FName, UActionBase* (*)(UActionDataBase* DataPtr, UObject* OuterObject)> Tuple(ActionName, &ClassName::Create); \
+	UActionManager::MapActionTypes.Add(Tuple); \
+
+#define RegisterCreateFunction(ClassName, DataClassName) \
+	static UActionBase* ClassName::Create(UActionDataBase* DataPtr, UObject* OuterObject)\
+	{\
+		DataClassName* ActionData = Cast<DataClassName>(DataPtr);\
+		ClassName* NewAction = NewObject<ClassName>(OuterObject);\
+		NewAction->InitialiseAction(ActionData);\
+		return NewAction;\
+	}\
+	
 UCLASS(EditInlineNew)
 class HOLYMAGICCENTURY_API UActionDataBase : public UObject
 {
@@ -41,10 +54,10 @@ public:
 	virtual const FName GetActionName() const PURE_VIRTUAL(UActionBase::OnActionDestroyed(), return TEXT("None"););
 
 	virtual void CancelAction() {}
+
 private:
 
 protected:
 
 	TArray<FName> Blacklist;
 };
-
