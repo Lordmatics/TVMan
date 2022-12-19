@@ -6,7 +6,7 @@
 #include "ActionBase.generated.h"
 
 #define RegisterActionToManager(ActionName, ClassName) \
-	TTuple<FName, UActionBase* (*)(UActionDataBase* DataPtr, UObject* OuterObject)> Tuple(ActionName, &ClassName::Create); \
+	TTuple<FName, UActionManager::CreateActionFuncPtr> Tuple(ActionName, &ClassName::Create); \
 	UActionManager::MapActionTypes.Add(Tuple); \
 
 #define RegisterCreateFunction(ClassName, DataClassName) \

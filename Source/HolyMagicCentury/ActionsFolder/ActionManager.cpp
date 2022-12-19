@@ -9,14 +9,7 @@
 #include "JumpAction.h"
 #include "GroundSlamAction.h"
 
-#define SetupActionMacro(DataClass, ActionClass, DataPtr, OuterObject)\
-	DataClass* ActionData = Cast<DataClass>(DataPtr);\
-	ActionClass* NewAction = NewObject<ActionClass>(OuterObject);\
-	NewAction->InitialiseAction(ActionData);\
-	SetCurrentAction(NewAction);\
-
-//TMap<FName, TPair<UActionBase*, UActionDataBase*>> UActionManager::MapActionTypes;
-TMap<FName, UActionBase* (*)(UActionDataBase* DataPtr, UObject* OuterObject)> UActionManager::MapActionTypes;
+TMap<FName, UActionManager::CreateActionFuncPtr> UActionManager::MapActionTypes;
 
 UActionManager::UActionManager() :
 	CurrentAction(nullptr)
