@@ -122,6 +122,15 @@ void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		const FVector& Vel = CharacterMovementComponent->Velocity;
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Vel: X: %.1f, Y: %.1f, Z: %.1f"), Vel.X, Vel.Y, Vel.Z));
+		}
+	}
+
 	if (ActionManager)
 	{
 		// Return to most recent action ?
@@ -435,6 +444,14 @@ void ABaseCharacter::SetFlying(bool Value)
 		{			
 			CharacterMovementComponent->SetDefaultMovementMode();
 		}		
+	}
+}
+
+void ABaseCharacter::EndAction()
+{
+	if (ActionManager)
+	{
+		ActionManager->EndCurrentAction();
 	}
 }
 

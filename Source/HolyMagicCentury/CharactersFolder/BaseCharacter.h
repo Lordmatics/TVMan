@@ -15,6 +15,7 @@ class UBaseCharacterAnimationInstance;
 class UMaterialInstanceDynamic;
 class UActionBase;
 class UActionManager;
+class UAnimMontage;
 
 namespace MaterialParameterNames
 {
@@ -65,6 +66,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void SetFlying(bool Value);
+
+	void EndAction();
 
 private:
 
@@ -123,5 +126,4 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		FCrouchData CrouchDataPacket;
-
 };

@@ -54,6 +54,9 @@ public:
 
 	virtual void CancelAction() override;
 
+	UFUNCTION()
+	void OnRaycastHit();
+
 private:
 
 	float Timer;

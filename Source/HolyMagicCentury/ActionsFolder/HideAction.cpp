@@ -26,7 +26,7 @@ void UHideActionData::InitialiseObject()
 UHideAction::UHideAction() :
 	JumpVelocity(300.0f)
 {
-	Blacklist.Push(ActionNames::LeapAction);
+	//Blacklist.Push(ActionNames::LeapAction);
 	Blacklist.Push(ActionNames::JumpAction);
 
 	RegisterActionToManager(ActionNames::HideAction, UHideAction);
@@ -73,6 +73,15 @@ void UHideAction::OnActionCreated()
 void UHideAction::OnActionProcess(const float DeltaTime)
 {
 	Super::OnActionProcess(DeltaTime);
+
+	UObject* Owner = GetOuter();
+	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner))
+	{
+		if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
+		{
+			AnimInstance->SetHiding(true);
+		}
+	}
 }
 
 void UHideAction::OnActionDestroyed()
@@ -112,4 +121,27 @@ void UHideAction::OnActionDestroyed()
 void UHideAction::OnLanded(const FHitResult& Hit)
 {
 	Super::OnLanded(Hit);
+}
+
+void UHideAction::CancelAction()
+{
+	UObject* Owner = GetOuter();
+	if (!Owner)
+	{
+		return;
+	}
+
+	UWorld* World = Owner->GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner);
+	if (!BaseCharacter)
+	{
+		return;
+	}
+
+	BaseCharacter->EndAction();
 }

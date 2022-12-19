@@ -9,6 +9,7 @@
 #include "HideAction.h"
 #include "JumpAction.h"
 #include "ActionManager.h"
+#include "../AnimationFolder/Notifies/AnimNotify_RaycastDown.h"
 
 ULeapAction::ULeapAction() :
 	Super(),
@@ -43,13 +44,46 @@ void ULeapAction::InitialiseAction(UActionDataBase* ActionData)
 			AnimInstance->SetLeaping(true);
 		}
 
-		BaseCharacter->SetFlying(true);
+		if (BaseCharacter->GetLastKnownDefaultActionName() == ActionNames::HideAction)
+		{
+
+		}
+		else
+		{
+			// Only TV Man needs to fly when leaping.
+			BaseCharacter->SetFlying(true);
+		}		
 	}
 }
 
 void ULeapAction::OnActionCreated()
 {
 	Timer = 0.0f;
+
+	UObject* Owner = GetOuter();
+	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner))
+	{
+		const FName& LastKnownDefaultActionNme = BaseCharacter->GetLastKnownDefaultActionName();
+		if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
+		{
+			if (LastKnownDefaultActionNme == ActionNames::HideAction)
+			{
+				AnimInstance->SetHiding(true);
+			}
+		}
+
+		if (LastKnownDefaultActionNme == ActionNames::HideAction)
+		{
+			
+		}
+		else
+		{
+			// Only TV Man needs to fly when leaping.
+			BaseCharacter->SetFlying(true);
+		}		
+	}
+
+	UAnimNotify_RaycastDown::OnCollisionDetected.AddDynamic(this, &ULeapAction::OnRaycastHit);
 }
 
 void ULeapAction::OnActionProcess(const float DeltaTime)
@@ -66,65 +100,14 @@ void ULeapAction::OnActionProcess(const float DeltaTime)
 		return;
 	}
 
-	//// Determine when the leap should finish. Do a raycast down
-	//UObject* Owner = GetOuter();
-	//if (!Owner)
-	//{
-	//	return;
-	//}
-
-	//UWorld* World = Owner->GetWorld();
-	//if (!World)
-	//{
-	//	return;
-	//}
-
-	//ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner);
-	//if (!BaseCharacter)
-	//{
-	//	return;
-	//}
-
-	//FHitResult HitResult;
-	//const FVector& Start = BaseCharacter->GetActorLocation();
-	//const float RayLength = 100.0f;
-	//const FVector End = Start - FVector(0.0f, 0.0f, RayLength);
-	//FCollisionQueryParams QueryParams;
-	//QueryParams.AddIgnoredActor(BaseCharacter);
-
-	//const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_WorldDynamic, QueryParams);
-	//
-	//bool bPersistent = true;
-	//float LifeTime = 0.0f;
-
-	//// @fixme, draw line with thickness = 2.f?
-	//if (bHit && HitResult.bBlockingHit)
-	//{
-	//	if (GEngine && HitResult.GetActor())
-	//	{
-	//		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
-	//	}
-	//	
-	//	// Red up to the blocking hit, green thereafter
-	//	DrawDebugLine(World, Start, HitResult.ImpactPoint, FLinearColor::Red.ToFColor(true), bPersistent, LifeTime);
-	//	DrawDebugLine(World, HitResult.ImpactPoint, End, FLinearColor::Green.ToFColor(true), bPersistent, LifeTime);
-	//	DrawDebugPoint(World, HitResult.ImpactPoint, 16.0f, FLinearColor::Red.ToFColor(true), bPersistent, LifeTime);
-	//}
-	//else
-	//{
-	//	// no hit means all red
-	//	DrawDebugLine(World, Start, End, FLinearColor::Red.ToFColor(true), bPersistent, LifeTime);
-	//}
-
-	//if (!bHit)
-	//{
-	//	return;
-	//}
-
-	//if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
-	//{
-	//	AnimInstance->SetLeaping(false);
-	//}
+	UObject* Owner = GetOuter();
+	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner))
+	{
+		if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
+		{
+			AnimInstance->SetLeaping(true);
+		}
+	}
 }
 
 void ULeapAction::OnActionDestroyed()
@@ -139,6 +122,8 @@ void ULeapAction::OnActionDestroyed()
 
 		BaseCharacter->SetFlying(false);
 	}
+
+	UAnimNotify_RaycastDown::OnCollisionDetected.RemoveDynamic(this, &ULeapAction::OnRaycastHit);
 }
 
 void ULeapAction::OnLanded(const FHitResult& Hit)
@@ -167,10 +152,17 @@ void ULeapAction::CancelAction()
 		return;
 	}
 
+	BaseCharacter->EndAction();
+
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 	{
 		AnimInstance->SetLeaping(false);
 	}
+}
+
+void ULeapAction::OnRaycastHit()
+{
+	CancelAction();
 }
 
 ULeapActionData::ULeapActionData() :

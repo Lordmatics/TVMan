@@ -53,6 +53,8 @@ public:
 
 	virtual const FName GetActionName() const { return ActionNames::HideAction; }
 
+	virtual void CancelAction() override;
+
 private:
 
 	float JumpVelocity;
