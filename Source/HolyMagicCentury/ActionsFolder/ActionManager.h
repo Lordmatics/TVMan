@@ -31,6 +31,8 @@ public:
 	void EndCurrentAction();
 
 	const FString GetCurrentActionName() const;
+	const bool IsCurrentAnimation(const FName& ActionName);
+
 private:
 
 	bool CreateActionFromName(const FName& ActionName, UActionDataBase* Data);

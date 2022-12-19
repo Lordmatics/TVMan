@@ -5,6 +5,8 @@
 #include "ActionBase.h"
 #include "LeapAction.h"
 #include "DefaultAction.h"
+#include "HideAction.h"
+#include "JumpAction.h"
 
 UActionManager::UActionManager() :
 	CurrentAction(nullptr)
@@ -65,6 +67,15 @@ const FString UActionManager::GetCurrentActionName() const
 	return local;
 }
 
+const bool UActionManager::IsCurrentAnimation(const FName& ActionName)
+{
+	if (UActionBase* Current = CurrentAction.Get())
+	{
+		return Current->GetActionName().IsEqual(ActionName);
+	}
+	return false;
+}
+
 bool UActionManager::CreateActionFromName(const FName& ActionName, UActionDataBase* Data)
 {
 	UObject* OuterObject = GetOuter();
@@ -91,7 +102,22 @@ bool UActionManager::CreateActionFromName(const FName& ActionName, UActionDataBa
 		SetCurrentAction(LeapAction);		
 		return true;
 	}
-
+	else if (ActionName == ActionNames::HideAction)
+	{
+		UHideActionData* ActionData = Cast<UHideActionData>(Data);
+		UHideAction* NewAction = NewObject<UHideAction>(OuterObject);
+		NewAction->InitialiseAction(ActionData);
+		SetCurrentAction(NewAction);
+		return true;
+	}
+	else if (ActionName == ActionNames::JumpAction)
+	{
+		UJumpActionData* ActionData = Cast<UJumpActionData>(Data);
+		UJumpAction* NewAction = NewObject<UJumpAction>(OuterObject);
+		NewAction->InitialiseAction(ActionData);
+		SetCurrentAction(NewAction);
+		return true;
+	}
 	return false;
 }
 

@@ -51,7 +51,7 @@ public:
 
 	UBaseCharacterAnimationInstance* GetAnimInstance() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Charcater")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void SetFlying(bool Value);
 
 private:
@@ -70,8 +70,6 @@ private:
 	virtual void AddControllerYawInput(float Value) override;	
 	virtual void AddControllerPitchInput(float Value) override;
 	
-	void SetHiding(bool Value);
-
 	void SetVelocity(const float Value);
 
 private:
@@ -80,6 +78,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent* ThirdPersonSpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		TArray<UMaterialInstanceDynamic*> DynamicMaterials;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		UActionManager* ActionManager;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float BaseTurnRate;
@@ -93,18 +97,5 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		float RunSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
-		float JumpVelocity;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
-		float ManJumpVelocity;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
-		float TVJumpVelocity;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
-	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
-	UActionManager* ActionManager;
 };

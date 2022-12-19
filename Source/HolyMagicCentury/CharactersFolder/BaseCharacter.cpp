@@ -12,14 +12,12 @@
 #include "../ActionsFolder/LeapAction.h"
 #include "../ActionsFolder/ActionManager.h"
 #include "../ActionsFolder/DefaultAction.h"
+#include "../ActionsFolder/HideAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
 	WalkSpeed(300.0f),
-	RunSpeed(600.0f),
-	JumpVelocity(150.0f),
-	ManJumpVelocity(150.0f),
-	TVJumpVelocity(300.0f)
+	RunSpeed(600.0f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -267,8 +265,20 @@ void ABaseCharacter::OnActionPressed()
 		}
 	}
 
-	const bool bIsHiding = AnimInstance->IsHiding();
-	SetHiding(!bIsHiding);
+	if (ActionManager)
+	{
+		const bool bHiding = ActionManager->IsCurrentAnimation(ActionNames::HideAction);
+		if (bHiding)
+		{
+			UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
+			ActionManager->RequestAction(ActionNames::DefaultAction, ActionData);
+		}
+		else
+		{
+			UHideActionData* ActionData = NewObject<UHideActionData>(this);
+			ActionManager->RequestAction(ActionNames::HideAction, ActionData);
+		}
+	}
 }
 
 void ABaseCharacter::OnActionReleased()
@@ -356,24 +366,6 @@ void ABaseCharacter::SetFlying(bool Value)
 			CharacterMovementComponent->SetDefaultMovementMode();
 		}		
 	}
-}
-
-void ABaseCharacter::SetHiding(bool Value)
-{
-	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	AnimInstance->SetHiding(Value);
-
-	JumpVelocity = Value ? TVJumpVelocity : ManJumpVelocity;
-	
-	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
-	{
-		CharacterMovementComponent->JumpZVelocity = JumpVelocity;
-	}	
 }
 
 void ABaseCharacter::SetVelocity(const float Value)
