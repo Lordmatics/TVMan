@@ -4,7 +4,8 @@
 #include "HolyMagicCentury/ActionsFolder/ActionBase.h"
 
 UActionBase::UActionBase() :	
-	Super()
+	Super(),
+	Blacklist()
 {
 }
 
@@ -19,7 +20,7 @@ void UActionBase::InitialiseAction(UActionDataBase* ActionData)
 bool UActionBase::IsActionBlacklisted(const FName& ActionName)
 {
 	//TODO: Implement this.
-	return false;
+	return Blacklist.Contains(ActionName);	
 }
 
 UActionDataBase::UActionDataBase() :

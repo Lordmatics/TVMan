@@ -50,3 +50,8 @@ void UDefaultAction::OnActionDestroyed()
 {
 
 }
+
+void UDefaultAction::OnLanded(const FHitResult& Hit)
+{
+
+}

@@ -36,9 +36,13 @@ public:
 	virtual void OnActionProcess(const float DeltaTime) PURE_VIRTUAL(UActionBase::OnActionProcess(const float DeltaTime), return;);
 	virtual void OnActionDestroyed() PURE_VIRTUAL(UActionBase::OnActionDestroyed(), return;);
 
+	virtual void OnLanded(const FHitResult& Hit) {}
+
 	virtual const FName GetActionName() const PURE_VIRTUAL(UActionBase::OnActionDestroyed(), return TEXT("None"););
 private:
 
 protected:
+
+	TArray<FName> Blacklist;
 };
 

@@ -3,6 +3,8 @@
 #include "../CharactersFolder/BaseCharacter.h"
 #include "../AnimationFolder/BaseCharacterAnimationInstance.h"
 #include <GameFramework/CharacterMovementComponent.h>
+#include "LeapAction.h"
+#include "JumpAction.h"
 
 UHideActionData::UHideActionData()
 {
@@ -23,7 +25,8 @@ UHideAction::UHideAction() :
 	PreviousVelocity(150.0f),
 	JumpVelocity(300.0f)
 {
-
+	Blacklist.Push(ActionNames::LeapAction);
+	Blacklist.Push(ActionNames::JumpAction);	
 }
 
 UHideAction::~UHideAction()
@@ -94,4 +97,9 @@ void UHideAction::OnActionDestroyed()
 	{
 		AnimInstance->SetHiding(false);
 	}
+}
+
+void UHideAction::OnLanded(const FHitResult& Hit)
+{
+
 }

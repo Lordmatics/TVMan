@@ -3,6 +3,8 @@
 #include "HolyMagicCentury/CharactersFolder/BaseCharacter.h"
 #include "HolyMagicCentury/AnimationFolder/BaseCharacterAnimationInstance.h"
 #include <Engine/World.h>
+#include "LeapAction.h"
+#include "HideAction.h"
 
 UJumpActionData::UJumpActionData()
 {
@@ -21,7 +23,8 @@ void UJumpActionData::InitialiseObject()
 
 UJumpAction::UJumpAction()
 {
-
+	Blacklist.Push(ActionNames::LeapAction);
+	Blacklist.Push(ActionNames::HideAction);
 }
 
 UJumpAction::~UJumpAction()
@@ -81,4 +84,9 @@ void UJumpAction::OnActionDestroyed()
 	{
 		
 	}
+}
+
+void UJumpAction::OnLanded(const FHitResult& Hit)
+{
+
 }

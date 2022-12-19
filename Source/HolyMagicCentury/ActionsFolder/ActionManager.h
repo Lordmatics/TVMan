@@ -31,7 +31,9 @@ public:
 	void EndCurrentAction();
 
 	const FString GetCurrentActionName() const;
-	const bool IsCurrentAnimation(const FName& ActionName);
+	const bool IsCurrentAction(const FName& ActionName);
+
+	void OnLanded(const FHitResult& Hit);
 
 private:
 

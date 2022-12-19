@@ -46,6 +46,8 @@ public:
 	virtual void OnActionProcess(const float DeltaTime) override;
 	virtual void OnActionDestroyed() override;
 
+	virtual void OnLanded(const FHitResult& Hit);
+
 	virtual const FName GetActionName() const { return ActionNames::LeapAction; }
 
 private:

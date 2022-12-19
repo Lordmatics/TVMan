@@ -13,6 +13,7 @@
 #include "../ActionsFolder/ActionManager.h"
 #include "../ActionsFolder/DefaultAction.h"
 #include "../ActionsFolder/HideAction.h"
+#include "../ActionsFolder/JumpAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
@@ -235,6 +236,12 @@ void ABaseCharacter::Jump()
 		}
 	}
 
+	if (ActionManager)
+	{
+		UJumpActionData* ActionData = NewObject<UJumpActionData>(this);
+		ActionManager->RequestAction(ActionNames::JumpAction, ActionData);
+	}
+
 	ACharacter::Jump();
 }
 
@@ -243,19 +250,24 @@ void ABaseCharacter::StopJumping()
 	ACharacter::StopJumping();
 }
 
+void ABaseCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (ActionManager)
+	{
+		ActionManager->OnLanded(Hit);
+
+		if (ActionManager->IsCurrentAction(ActionNames::JumpAction))
+		{
+			UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
+			ActionManager->RequestAction(ActionNames::DefaultAction, ActionData);
+		}		
+	}
+}
+
 void ABaseCharacter::OnActionPressed()
 {
-	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	if (AnimInstance->IsLeaping())
-	{
-		return;
-	}
-
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
 	{
 		const bool bIsFalling = CharacterMovementComp->IsFalling();
@@ -267,7 +279,8 @@ void ABaseCharacter::OnActionPressed()
 
 	if (ActionManager)
 	{
-		const bool bHiding = ActionManager->IsCurrentAnimation(ActionNames::HideAction);
+		// TODO: Make it so you cant instantly exit this.
+		const bool bHiding = ActionManager->IsCurrentAction(ActionNames::HideAction);
 		if (bHiding)
 		{
 			UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
@@ -288,17 +301,6 @@ void ABaseCharacter::OnActionReleased()
 
 void ABaseCharacter::OnLeapPressed()
 {
-	UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return;
-	}
-
-	if (AnimInstance->IsHiding())
-	{
-		return;
-	}
-
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
 	{
 		const bool bIsFalling = CharacterMovementComp->IsFalling();

@@ -67,13 +67,21 @@ const FString UActionManager::GetCurrentActionName() const
 	return local;
 }
 
-const bool UActionManager::IsCurrentAnimation(const FName& ActionName)
+const bool UActionManager::IsCurrentAction(const FName& ActionName)
 {
 	if (UActionBase* Current = CurrentAction.Get())
 	{
 		return Current->GetActionName().IsEqual(ActionName);
 	}
 	return false;
+}
+
+void UActionManager::OnLanded(const FHitResult& Hit)
+{
+	if (UActionBase* Current = CurrentAction.Get())
+	{
+		return Current->OnLanded(Hit);
+	}
 }
 
 bool UActionManager::CreateActionFromName(const FName& ActionName, UActionDataBase* Data)

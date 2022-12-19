@@ -35,6 +35,8 @@ public:
 	virtual void Jump() override;	
 	virtual void StopJumping() override;
 
+	virtual void Landed(const FHitResult& Hit) override;
+
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void OnActionPressed();
 
