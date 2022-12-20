@@ -6,6 +6,8 @@
 #include "HolyMagicCentury/ActionsFolder/ActionBase.h"
 #include "LeapAction.generated.h"
 
+class ABaseCharacter;
+
 /**
  * 
  */
@@ -57,6 +59,9 @@ public:
 	UFUNCTION()
 	void OnRaycastHit();
 
+private:
+
+	void CheckCollisions(const ABaseCharacter& BaseCharacter);
 private:
 
 	float Timer;

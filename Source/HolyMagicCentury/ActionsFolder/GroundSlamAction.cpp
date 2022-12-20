@@ -9,6 +9,7 @@
 #include "ActionManager.h"
 #include <DrawDebugHelpers.h>
 #include <GameFramework/CharacterMovementComponent.h>
+#include "../ActorsFolder/DestructibleObject.h"
 
 UGroundSlamActionData::UGroundSlamActionData()
 {
@@ -155,6 +156,14 @@ void UGroundSlamAction::OnActionDestroyed()
 
 void UGroundSlamAction::OnLanded(const FHitResult& HitResult)
 {
+	if (AActor* Actor = HitResult.GetActor())
+	{
+		if (ADestructibleObject* Destructible = Cast<ADestructibleObject>(Actor))
+		{
+			Destructible->Explode(HitResult.Location);
+		}
+	}
+
 	CancelAction();
 }
 
@@ -182,4 +191,6 @@ void UGroundSlamAction::CancelAction()
 	{
 		AnimInstance->SetGroundSlamming(false);
 	}
+
+	BaseCharacter->EndAction();
 }
