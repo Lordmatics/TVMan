@@ -19,7 +19,7 @@ void UActionBase::InitialiseAction(UActionDataBase* ActionData)
 
 bool UActionBase::IsActionBlacklisted(const FName& ActionName)
 {
-	//TODO: Implement this.
+	//TODO: Implement this.	
 	return Blacklist.Contains(ActionName);	
 }
 

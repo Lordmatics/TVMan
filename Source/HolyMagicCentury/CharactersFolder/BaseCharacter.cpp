@@ -64,6 +64,11 @@ ABaseCharacter::ABaseCharacter() :
 
 }
 
+ABaseCharacter::~ABaseCharacter()
+{
+	volatile int i = 5;
+}
+
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
@@ -389,6 +394,12 @@ void ABaseCharacter::OnLeapPressed()
 
 	if (ActionManager)
 	{
+		const bool bAlreadyInLeap = ActionManager->GetCurrentActionName().Equals(ActionNames::LeapAction.ToString());
+		if (bAlreadyInLeap)
+		{
+			return;
+		}
+
 		ULeapActionData* LeapData = NewObject<ULeapActionData>(this);
 		ActionManager->RequestAction(ActionNames::LeapAction, LeapData);
 	}

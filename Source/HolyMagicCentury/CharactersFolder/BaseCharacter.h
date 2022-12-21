@@ -30,6 +30,7 @@ class HOLYMAGICCENTURY_API ABaseCharacter : public ACharacter
 public:
 
 	ABaseCharacter();
+	virtual ~ABaseCharacter();
 
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return ThirdPersonSpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return ThirdPersonCamera; }
