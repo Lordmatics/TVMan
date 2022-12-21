@@ -16,6 +16,7 @@ class UMaterialInstanceDynamic;
 class UActionBase;
 class UActionManager;
 class UAnimMontage;
+class UStaticMeshComponent;
 
 namespace MaterialParameterNames
 {
@@ -94,6 +95,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		USpringArmComponent* ThirdPersonSpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		UStaticMeshComponent* AntennaLeft;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		UStaticMeshComponent* AntennaRight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		TArray<UMaterialInstanceDynamic*> DynamicMaterials;

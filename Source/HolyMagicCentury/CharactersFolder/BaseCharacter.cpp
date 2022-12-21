@@ -62,6 +62,19 @@ ABaseCharacter::ABaseCharacter() :
 	ThirdPersonCamera->SetupAttachment(ThirdPersonSpringArm, USpringArmComponent::SocketName);	
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
+	AntennaLeft = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AntennaLeft"));
+	AntennaLeft->SetupAttachment(GetMesh(), TEXT("TV"));
+	AntennaLeft->SetRelativeScale3D(FVector(0.05f));
+	AntennaLeft->SetRelativeLocation(FVector(0.326331f, 0.0f, 0.978994f));
+	AntennaLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	AntennaRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AntennaRight"));
+	AntennaRight->SetupAttachment(GetMesh(), TEXT("TV"));
+	AntennaRight->SetRelativeScale3D(FVector(0.05f));
+	AntennaRight->SetRelativeLocation(FVector(-0.326331f, 0.0f, 0.978994f));
+	AntennaRight->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	AntennaRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 }
 
 ABaseCharacter::~ABaseCharacter()
