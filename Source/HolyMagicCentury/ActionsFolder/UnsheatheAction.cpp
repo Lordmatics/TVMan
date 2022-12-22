@@ -59,6 +59,7 @@ void UUnsheatheAction::InitialiseAction(UActionDataBase* ActionDataBase)
 			if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 			{				
 				AnimInstance->SetUnsheatheAntenna(true);
+				AnimInstance->SetTorso(true);
 			}
 		}			
 	}
@@ -132,6 +133,7 @@ void UUnsheatheAction::OnActionDestroyed()
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 	{
 		AnimInstance->SetSheatheAntenna(false);
+		AnimInstance->SetTorso(false);
 	}
 }
 

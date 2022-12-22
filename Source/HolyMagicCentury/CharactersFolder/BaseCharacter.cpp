@@ -17,6 +17,7 @@
 #include <Engine/EngineTypes.h>
 #include "../ActionsFolder/UnsheatheAction.h"
 #include "../ActionsFolder/SheatheAction.h"
+#include "../ActionsFolder/LungeAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
@@ -201,6 +202,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ABaseCharacter::OnAttackPressed);
+	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ABaseCharacter::OnAttackReleased);
+
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABaseCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ABaseCharacter::StopJumping);
 
@@ -373,6 +377,21 @@ void ABaseCharacter::Landed(const FHitResult& Hit)
 	}
 }
 
+void ABaseCharacter::OnAttackPressed()
+{
+	const bool bHasWeaponOut = IsWeaponUnsheathed();
+	if (bHasWeaponOut)
+	{
+		ULungeActionData* ActionData = NewObject<ULungeActionData>(this);
+		ActionManager->RequestAction(ActionNames::LungeAction, ActionData);	
+	}
+}
+
+void ABaseCharacter::OnAttackReleased()
+{
+
+}
+
 void ABaseCharacter::OnNorthPressed()
 {
 	// Temp
@@ -382,13 +401,7 @@ void ABaseCharacter::OnNorthPressed()
 		const bool bHiding = ActionManager->IsCurrentAction(ActionNames::HideAction);
 		if (!bHiding)
 		{
-
-			bool bHasWeaponOut = false;
-			if (UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance())
-			{
-				bHasWeaponOut = AnimInstance->IsAntennaUnsheathed();
-			}
-
+			const bool bHasWeaponOut = IsWeaponUnsheathed();
 			if (bHasWeaponOut)
 			{
 				USheatheActionData* ActionData = NewObject<USheatheActionData>(this);
@@ -432,11 +445,7 @@ void ABaseCharacter::OnActionPressed()
 		}
 	}
 
-	bool bHasWeaponOut = false;
-	if (UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance())
-	{
-		bHasWeaponOut = AnimInstance->IsAntennaUnsheathed();
-	}
+	const bool bHasWeaponOut = IsWeaponUnsheathed();
 
 	if (ActionManager)
 	{
@@ -585,6 +594,16 @@ void ABaseCharacter::DetachAntennaFromHand()
 	//RightAntenna->SetRelativeLocation(FVector(-0.326331f, 0.0f, 0.978994f));
 	//RightAntenna->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	//RightAntenna->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+bool ABaseCharacter::IsWeaponUnsheathed() const
+{
+	bool bHasWeaponOut = false;
+	if (UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance())
+	{
+		bHasWeaponOut = AnimInstance->IsAntennaUnsheathed();
+	}
+	return bHasWeaponOut;
 }
 
 void ABaseCharacter::SetVelocity(const float Value)

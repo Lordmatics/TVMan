@@ -3,6 +3,7 @@
 
 FCharacterMontages::FCharacterMontages() :
 	UnsheatheMontage(nullptr),
-	SheatheMontage(nullptr)
+	SheatheMontage(nullptr),
+	LungeMontage(nullptr)
 {	
 }

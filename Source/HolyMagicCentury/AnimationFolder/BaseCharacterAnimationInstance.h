@@ -33,6 +33,19 @@ public:
 	FORCEINLINE void SetSheatheAntenna(bool Value) { bSheatheAntenna = Value; }
 	FORCEINLINE bool IsAntennaSheathed() const { return bSheatheAntenna; }
 
+	FORCEINLINE void SetAttacking(bool Value) { bAttacking = Value; }
+	FORCEINLINE bool IsAttacking() const { return bAttacking; }
+
+	FORCEINLINE void SetLunging(bool Value) { bLunging = Value; }
+	FORCEINLINE bool IsLunging() const { return bLunging; }
+
+	FORCEINLINE void SetSlashing(bool Value) { bSlashing = Value; }
+	FORCEINLINE bool IsSlashing() const { return bSlashing; }
+
+	FORCEINLINE void SetTorso(bool Value) { bUseTorso = Value; }
+	FORCEINLINE bool IsTorso() const { return bUseTorso; }
+
+
 private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
@@ -49,4 +62,16 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	bool bSheatheAntenna;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		bool bAttacking;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		bool bLunging;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		bool bSlashing;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		bool bUseTorso;
 };

@@ -54,10 +54,16 @@ public:
 	virtual void Landed(const FHitResult& Hit) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
-		void OnNorthPressed();
+		void OnAttackPressed();
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
-		void OnNorthReleased();
+		void OnAttackReleased();
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	void OnNorthPressed();
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	void OnNorthReleased();
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void OnActionPressed();
@@ -82,6 +88,9 @@ public:
 
 	void AttachAntennaToHand();
 	void DetachAntennaFromHand();
+
+	bool IsWeaponUnsheathed() const;
+
 private:
 
 	virtual void BeginPlay() override;

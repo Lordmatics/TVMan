@@ -9,7 +9,11 @@ UBaseCharacterAnimationInstance::UBaseCharacterAnimationInstance() :
 	bIsLeaping(false),
 	bIsGroundSlamming(false),
 	bUnsheatheAntenna(false),
-	bSheatheAntenna(false)
+	bSheatheAntenna(false),
+	bAttacking(false),
+	bLunging(false),
+	bSlashing(false),
+	bUseTorso(false)
 {
 
 }

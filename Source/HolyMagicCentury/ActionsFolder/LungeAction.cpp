@@ -1,43 +1,41 @@
 // Lordmatics Games December 2022
-#include "HolyMagicCentury/ActionsFolder/SheatheAction.h"
+#include "HolyMagicCentury/ActionsFolder/LungeAction.h"
 #include "HolyMagicCentury/CharactersFolder/BaseCharacter.h"
 #include "HolyMagicCentury/AnimationFolder/BaseCharacterAnimationInstance.h"
 #include <Engine/World.h>
 #include "ActionManager.h"
-#include "GroundSlamAction.h"
-#include "LeapAction.h"
+#include "../CharactersFolder/CharacterMontages.h"
 
-USheatheActionData::USheatheActionData()
+ULungeActionData::ULungeActionData()
 {
 
 }
 
-USheatheActionData::~USheatheActionData()
+ULungeActionData::~ULungeActionData()
 {
 
 }
 
-void USheatheActionData::InitialiseObject()
+void ULungeActionData::InitialiseObject()
 {
 	Super::InitialiseObject();
 }
 
-USheatheAction::USheatheAction()
+ULungeAction::ULungeAction()
 {
-	Blacklist.Push(ActionNames::GroundSlamAction);
-	Blacklist.Push(ActionNames::LeapAction);
-
-	RegisterActionToManager(ActionNames::SheatheAction, USheatheAction);
+	RegisterActionToManager(ActionNames::LungeAction, ULungeAction);
 }
 
-USheatheAction::~USheatheAction()
+ULungeAction::~ULungeAction()
 {
 
 }
 
-void USheatheAction::InitialiseAction(UActionDataBase* ActionDataBase)
+void ULungeAction::InitialiseAction(UActionDataBase* ActionDataBase)
 {
-	USheatheActionData* ActionData = Cast<USheatheActionData>(ActionDataBase);
+	Super::InitialiseAction(ActionDataBase);
+
+	ULungeActionData* ActionData = Cast<ULungeActionData>(ActionDataBase);
 	if (!ActionData)
 	{
 		return;
@@ -47,31 +45,32 @@ void USheatheAction::InitialiseAction(UActionDataBase* ActionDataBase)
 	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner))
 	{
 		FCharacterMontages& MontagePacket = BaseCharacter->GetMontagePacket();
-		UAnimMontage* SheatheMontage = MontagePacket.SheatheMontage;
-		if (!SheatheMontage)
+		UAnimMontage* Montage = MontagePacket.LungeMontage;
+		if (!Montage)
 		{
 			return;
 		}
 
-		const float Duration = BaseCharacter->PlayAnimMontage(SheatheMontage, 1.0f, NAME_None);
+		const float Duration = BaseCharacter->PlayAnimMontage(Montage, 1.0f, NAME_None);
 		if (Duration >= 0.0f)
 		{
 			if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 			{
-				AnimInstance->SetSheatheAntenna(true);
-				AnimInstance->SetTorso(true);
+				AnimInstance->SetLunging(true);
 			}
 		}
 	}
 }
 
-void USheatheAction::OnActionCreated()
+void ULungeAction::OnActionCreated()
 {
-
+	Super::OnActionCreated();
 }
 
-void USheatheAction::OnActionProcess(const float DeltaTime)
+void ULungeAction::OnActionProcess(const float DeltaTime)
 {
+	Super::OnActionProcess(DeltaTime);
+
 	UObject* Owner = GetOuter();
 	if (!Owner)
 	{
@@ -97,21 +96,23 @@ void USheatheAction::OnActionProcess(const float DeltaTime)
 	}
 
 	FCharacterMontages& MontagePacket = BaseCharacter->GetMontagePacket();
-	UAnimMontage* SheatheMontage = MontagePacket.SheatheMontage;
-	if (!SheatheMontage)
+	UAnimMontage* Montage = MontagePacket.LungeMontage;
+	if (!Montage)
 	{
 		return;
 	}
 
-	const bool bIsPlaying = AnimInstance->Montage_IsPlaying(SheatheMontage);
+	const bool bIsPlaying = AnimInstance->Montage_IsPlaying(Montage);
 	if (!bIsPlaying)
 	{
 		CancelAction();
 	}
 }
 
-void USheatheAction::OnActionDestroyed()
+void ULungeAction::OnActionDestroyed()
 {
+	Super::OnActionDestroyed();
+
 	UObject* Owner = GetOuter();
 	if (!Owner)
 	{
@@ -132,17 +133,16 @@ void USheatheAction::OnActionDestroyed()
 
 	if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 	{
-		AnimInstance->SetUnsheatheAntenna(false);
-		AnimInstance->SetTorso(false);
+		AnimInstance->SetLunging(false);
 	}
 }
 
-void USheatheAction::OnLanded(const FHitResult& HitResult)
+void ULungeAction::OnLanded(const FHitResult& HitResult)
 {
-
+	Super::OnLanded(HitResult);
 }
 
-void USheatheAction::CancelAction()
+void ULungeAction::CancelAction()
 {
 	UObject* Owner = GetOuter();
 	if (!Owner)
