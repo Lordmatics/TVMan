@@ -7,7 +7,9 @@ UBaseCharacterAnimationInstance::UBaseCharacterAnimationInstance() :
 	Super(),
 	bIsHiding(false),
 	bIsLeaping(false),
-	bIsGroundSlamming(false)
+	bIsGroundSlamming(false),
+	bUnsheatheAntenna(false),
+	bSheatheAntenna(false)
 {
 
 }

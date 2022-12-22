@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include <UObject/NoExportTypes.h>
 #include "HolyMagicCentury/CharactersFolder/CrouchData.h"
+#include "CharacterMontages.h"
 #include "BaseCharacter.generated.h"
 
 class UInputComponent;
@@ -44,11 +45,19 @@ public:
 	FORCEINLINE void SetMovementDisabled(bool Value) { bMovementDisabled = Value; }
 	FORCEINLINE void SetRotationDisabled(bool Value) { bRotationDisabled = Value; }
 	FName GetLastKnownDefaultActionName() const;
+	FORCEINLINE const FCharacterMontages& GetMontagePacket() const { return MontagePacket; }
+	FORCEINLINE FCharacterMontages& GetMontagePacket() { return MontagePacket; }
 
 	virtual void Jump() override;	
 	virtual void StopJumping() override;
 
 	virtual void Landed(const FHitResult& Hit) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+		void OnNorthPressed();
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+		void OnNorthReleased();
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void OnActionPressed();
@@ -71,6 +80,8 @@ public:
 
 	void EndAction();
 
+	void AttachAntennaToHand();
+	void DetachAntennaFromHand();
 private:
 
 	virtual void BeginPlay() override;
@@ -97,10 +108,10 @@ private:
 		USpringArmComponent* ThirdPersonSpringArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* AntennaLeft;
+		UStaticMeshComponent* LeftAntenna;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* AntennaRight;
+		UStaticMeshComponent* RightAntenna;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		TArray<UMaterialInstanceDynamic*> DynamicMaterials;
@@ -134,4 +145,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		FCrouchData CrouchDataPacket;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
+		FCharacterMontages MontagePacket;
+
 };

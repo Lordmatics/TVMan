@@ -7,6 +7,7 @@
 #include "JumpAction.h"
 #include <Components/CapsuleComponent.h>
 #include "ActionManager.h"
+#include "UnsheatheAction.h"
 
 UHideActionData::UHideActionData()
 {
@@ -28,7 +29,7 @@ UHideAction::UHideAction() :
 {
 	//Blacklist.Push(ActionNames::LeapAction);
 	Blacklist.Push(ActionNames::JumpAction);
-
+	Blacklist.Push(ActionNames::UnsheatheAction);
 	RegisterActionToManager(ActionNames::HideAction, UHideAction);
 }
 

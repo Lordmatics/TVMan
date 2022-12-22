@@ -14,6 +14,9 @@
 #include "../ActionsFolder/HideAction.h"
 #include "../ActionsFolder/JumpAction.h"
 #include "../ActionsFolder/GroundSlamAction.h"
+#include <Engine/EngineTypes.h>
+#include "../ActionsFolder/UnsheatheAction.h"
+#include "../ActionsFolder/SheatheAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
@@ -22,7 +25,8 @@ ABaseCharacter::ABaseCharacter() :
 	bMovementDisabled(false),
 	bRotationDisabled(false),
 	WalkSpeed(300.0f),
-	RunSpeed(600.0f)
+	RunSpeed(600.0f),
+	MontagePacket()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -62,18 +66,18 @@ ABaseCharacter::ABaseCharacter() :
 	ThirdPersonCamera->SetupAttachment(ThirdPersonSpringArm, USpringArmComponent::SocketName);	
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
-	AntennaLeft = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AntennaLeft"));
-	AntennaLeft->SetupAttachment(GetMesh(), TEXT("TV"));
-	AntennaLeft->SetRelativeScale3D(FVector(0.05f));
-	AntennaLeft->SetRelativeLocation(FVector(0.326331f, 0.0f, 0.978994f));
-	AntennaLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	LeftAntenna = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LAntenna"));
+	LeftAntenna->SetupAttachment(GetMesh(), TEXT("TV"));
+	LeftAntenna->SetRelativeScale3D(FVector(0.05f));
+	LeftAntenna->SetRelativeLocation(FVector(0.326331f, 0.0f, 0.978994f));
+	LeftAntenna->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	AntennaRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AntennaRight"));
-	AntennaRight->SetupAttachment(GetMesh(), TEXT("TV"));
-	AntennaRight->SetRelativeScale3D(FVector(0.05f));
-	AntennaRight->SetRelativeLocation(FVector(-0.326331f, 0.0f, 0.978994f));
-	AntennaRight->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
-	AntennaRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RightAntenna = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RAntenna"));
+	RightAntenna->SetupAttachment(GetMesh(), TEXT("TV"));
+	RightAntenna->SetRelativeScale3D(FVector(0.05f));
+	RightAntenna->SetRelativeLocation(FVector(-0.326331f, 0.0f, 0.978994f));
+	RightAntenna->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	RightAntenna->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 }
 
@@ -103,6 +107,22 @@ void ABaseCharacter::BeginPlay()
 	if (!SkeletalMesh)
 	{
 		return;
+	}
+
+	if (RightAntenna)
+	{
+		const FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
+		const FName SocketToAttach("RightAntennaSocket");
+		RightAntenna->AttachToComponent(SkeletalMesh, Rules, SocketToAttach);
+		RightAntenna->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (LeftAntenna)
+	{
+		const FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
+		const FName SocketToAttach("LeftAntennaSocket");
+		LeftAntenna->AttachToComponent(SkeletalMesh, Rules, SocketToAttach);
+		LeftAntenna->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	const TArray<UMaterialInterface*>& Materials = SkeletalMesh->GetMaterials();
@@ -186,6 +206,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &ABaseCharacter::OnActionPressed);
 	PlayerInputComponent->BindAction("Action", IE_Released, this, &ABaseCharacter::OnActionReleased);
+
+	PlayerInputComponent->BindAction("North", IE_Pressed, this, &ABaseCharacter::OnNorthPressed);
+	PlayerInputComponent->BindAction("North", IE_Released, this, &ABaseCharacter::OnNorthReleased);
 
 	PlayerInputComponent->BindAction("Leap", IE_Pressed, this, &ABaseCharacter::OnLeapPressed);
 	PlayerInputComponent->BindAction("Leap", IE_Released, this, &ABaseCharacter::OnLeapReleased);
@@ -350,6 +373,43 @@ void ABaseCharacter::Landed(const FHitResult& Hit)
 	}
 }
 
+void ABaseCharacter::OnNorthPressed()
+{
+	// Temp
+	// Grab Antenna
+	if (ActionManager)
+	{
+		const bool bHiding = ActionManager->IsCurrentAction(ActionNames::HideAction);
+		if (!bHiding)
+		{
+
+			bool bHasWeaponOut = false;
+			if (UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance())
+			{
+				bHasWeaponOut = AnimInstance->IsAntennaUnsheathed();
+			}
+
+			if (bHasWeaponOut)
+			{
+				USheatheActionData* ActionData = NewObject<USheatheActionData>(this);
+				ActionManager->RequestAction(ActionNames::SheatheAction, ActionData);
+				return;
+			}
+			else
+			{
+				UUnsheatheActionData* ActionData = NewObject<UUnsheatheActionData>(this);
+				ActionManager->RequestAction(ActionNames::UnsheatheAction, ActionData);
+				return;
+			}
+		}
+	}
+}
+
+void ABaseCharacter::OnNorthReleased()
+{
+
+}
+
 void ABaseCharacter::OnActionPressed()
 {
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
@@ -372,6 +432,12 @@ void ABaseCharacter::OnActionPressed()
 		}
 	}
 
+	bool bHasWeaponOut = false;
+	if (UBaseCharacterAnimationInstance* AnimInstance = GetAnimInstance())
+	{
+		bHasWeaponOut = AnimInstance->IsAntennaUnsheathed();
+	}
+
 	if (ActionManager)
 	{
 		// TODO: Make it so you cant instantly exit this.
@@ -381,7 +447,7 @@ void ABaseCharacter::OnActionPressed()
 			UDefaultActionData* ActionData = NewObject<UDefaultActionData>(this);
 			ActionManager->RequestAction(ActionNames::DefaultAction, ActionData);
 		}
-		else
+		else if(!bHasWeaponOut)
 		{
 			UHideActionData* ActionData = NewObject<UHideActionData>(this);
 			ActionManager->RequestAction(ActionNames::HideAction, ActionData);
@@ -477,6 +543,48 @@ void ABaseCharacter::EndAction()
 	{
 		ActionManager->EndCurrentAction();
 	}
+}
+
+void ABaseCharacter::AttachAntennaToHand()
+{
+	if (!RightAntenna)
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* BodyMesh = GetMesh();
+	if (!BodyMesh)
+	{
+		return;
+	}
+
+	const FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
+	const FName SocketToAttach("WeaponSocket");
+	RightAntenna->AttachToComponent(BodyMesh, Rules, SocketToAttach);
+}
+
+void ABaseCharacter::DetachAntennaFromHand()
+{
+	if (!RightAntenna)
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* BodyMesh = GetMesh();
+	if (!BodyMesh)
+	{
+		return;
+	}
+
+	const FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
+	const FName SocketToAttach("RightAntennaSocket");
+	RightAntenna->AttachToComponent(BodyMesh, Rules, SocketToAttach);
+
+	//RightAntenna->SetupAttachment(BodyMesh, TEXT("TV"));
+	//RightAntenna->SetRelativeScale3D(FVector(0.05f));
+	//RightAntenna->SetRelativeLocation(FVector(-0.326331f, 0.0f, 0.978994f));
+	//RightAntenna->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	//RightAntenna->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABaseCharacter::SetVelocity(const float Value)

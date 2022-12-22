@@ -27,6 +27,12 @@ public:
 	FORCEINLINE void SetGroundSlamming(bool Value) { bIsGroundSlamming = Value; }
 	FORCEINLINE bool IsGroundSlamming() const { return bIsGroundSlamming; }
 
+	FORCEINLINE void SetUnsheatheAntenna(bool Value) { bUnsheatheAntenna = Value; }
+	FORCEINLINE bool IsAntennaUnsheathed() const { return bUnsheatheAntenna; }
+
+	FORCEINLINE void SetSheatheAntenna(bool Value) { bSheatheAntenna = Value; }
+	FORCEINLINE bool IsAntennaSheathed() const { return bSheatheAntenna; }
+
 private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
@@ -37,4 +43,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	bool bIsGroundSlamming;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	bool bUnsheatheAntenna;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	bool bSheatheAntenna;
 };
