@@ -61,7 +61,7 @@ public:
 
 private:
 
-	void CheckCollisions(const ABaseCharacter& BaseCharacter);
+	void CheckCollisions(ABaseCharacter& BaseCharacter);
 private:
 
 	float Timer;

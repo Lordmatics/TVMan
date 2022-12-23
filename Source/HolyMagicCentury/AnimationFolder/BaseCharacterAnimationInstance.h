@@ -45,6 +45,7 @@ public:
 	FORCEINLINE void SetTorso(bool Value) { bUseTorso = Value; }
 	FORCEINLINE bool IsTorso() const { return bUseTorso; }
 
+	void ResetNonDefaults();
 
 private:
 	

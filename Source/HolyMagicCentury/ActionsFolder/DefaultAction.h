@@ -54,4 +54,5 @@ public:
 
 private:
 
+	void ResetAnimInstanceStates();
 };

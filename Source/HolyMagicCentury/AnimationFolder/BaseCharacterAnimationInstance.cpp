@@ -17,3 +17,10 @@ UBaseCharacterAnimationInstance::UBaseCharacterAnimationInstance() :
 {
 
 }
+
+void UBaseCharacterAnimationInstance::ResetNonDefaults()
+{
+	// Reset Movement actions.
+	SetLeaping(false);
+	SetGroundSlamming(false);	
+}

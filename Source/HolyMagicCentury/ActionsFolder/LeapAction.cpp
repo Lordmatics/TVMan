@@ -14,12 +14,14 @@
 #include "../ActorsFolder/LeapFlap.h"
 #include <GameFramework/CharacterMovementComponent.h>
 #include "../ActorsFolder/DestructibleObject.h"
+#include <Kismet/KismetSystemLibrary.h>
+#include <GameFramework/Character.h>
 
 ULeapAction::ULeapAction() :
 	Super(),
 	Timer(0.0f),
 	ProcessDelayTime(0.8f),
-	Expiration(7.5f)
+	Expiration(3.25f)
 {
 	Blacklist.Push(ActionNames::JumpAction);
 	Blacklist.Push(ActionNames::HideAction);
@@ -117,10 +119,10 @@ void ULeapAction::OnActionProcess(const float DeltaTime)
 		{
 
 		}
-		if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
-		{
-			AnimInstance->SetLeaping(true);
-		}
+		//if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
+		//{
+		//	AnimInstance->SetLeaping(true);
+		//}
 	}
 }
 
@@ -179,7 +181,7 @@ void ULeapAction::OnRaycastHit()
 	CancelAction();
 }
 
-void ULeapAction::CheckCollisions(const ABaseCharacter& BaseCharacter)
+void ULeapAction::CheckCollisions(ABaseCharacter& BaseCharacter)
 {
 	// HERE:
 	UCapsuleComponent* CapsuleComponent = BaseCharacter.GetCapsuleComponent();
@@ -194,6 +196,14 @@ void ULeapAction::CheckCollisions(const ABaseCharacter& BaseCharacter)
 		return;
 	}
 
+
+	if (BaseCharacter.GetCharacterMovement() && GEngine)
+	{
+		const bool bIsFalling = BaseCharacter.GetCharacterMovement()->IsFalling();
+		GEngine->AddOnScreenDebugMessage(-1, World->GetDeltaSeconds(), FColor::Green, FString::Printf(TEXT("Falling: %s"), bIsFalling ? TEXT("True") : TEXT("False")));
+	}
+	
+
 	FHitResult HitResult;
 	const FVector& Start = CapsuleComponent->GetComponentLocation();
 	const FVector& Forward = BaseCharacter.GetActorForwardVector();
@@ -201,9 +211,17 @@ void ULeapAction::CheckCollisions(const ABaseCharacter& BaseCharacter)
 	const float ZOffset = 0.0f;// -50.0f;
 	//FVector Length = FVector(0.0f, RayLength, ZOffset);
 	const FVector End = Start + (Forward * RayLength);
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(&BaseCharacter);	
-	const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_WorldDynamic, QueryParams);
+	//FCollisionQueryParams QueryParams;
+	//QueryParams.AddIgnoredActor(&BaseCharacter);	
+	//const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_WorldDynamic, QueryParams);
+
+	TArray<AActor*> ActorsToIgnore;
+	AActor* OwnerChar = &BaseCharacter;
+	ActorsToIgnore.Add(OwnerChar);
+
+	const float Radius = 50.0f;
+	const bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetOuter(), Start, End, Radius, ETraceTypeQuery::TraceTypeQuery2, true,
+		ActorsToIgnore, EDrawDebugTrace::ForOneFrame, HitResult, true);
 
 	bool bPersistent = true;
 	float LifeTime = 0.0f;
