@@ -18,6 +18,7 @@
 #include "../ActionsFolder/UnsheatheAction.h"
 #include "../ActionsFolder/SheatheAction.h"
 #include "../ActionsFolder/LungeAction.h"
+#include "../ActionsFolder/SlashAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
@@ -176,6 +177,25 @@ void ABaseCharacter::Tick(float DeltaTime)
 		const bool bProcessSuccess = ActionManager->Process(DeltaTime);
 		if (!bProcessSuccess)
 		{
+			const bool bHasWeaponOut = IsWeaponUnsheathed();
+			if (bHasWeaponOut)
+			{
+				const bool bHasEntries = !AttackBuffer.IsEmpty();
+				if (bHasEntries)
+				{
+					FName Item;
+					if (AttackBuffer.Dequeue(Item))
+					{							
+						if (Item == ActionNames::SlashAction)
+						{
+							USlashActionData* ActionData = NewObject<USlashActionData>(this);
+							ActionManager->RequestAction(Item, ActionData);
+							return;
+						}							
+					}
+				}
+			}
+
 			// TODO: See if i can streamline this later.
 			const FName& LastKnownActionName = ActionManager->GetLastKnownDefaultAction();
 			if (LastKnownActionName == ActionNames::DefaultAction)
@@ -336,6 +356,11 @@ FName ABaseCharacter::GetLastKnownDefaultActionName() const
 	return NAME_None;
 }
 
+const float ABaseCharacter::GetWeaponStrength() const
+{
+	return 500.0f;
+}
+
 void ABaseCharacter::Jump()
 {
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
@@ -379,11 +404,57 @@ void ABaseCharacter::Landed(const FHitResult& Hit)
 
 void ABaseCharacter::OnAttackPressed()
 {
+	if (!ActionManager)
+	{
+		return;
+	}
+
+	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
+	{
+		const bool bIsFalling = CharacterMovementComp->IsFalling();
+		if (bIsFalling)
+		{
+			const bool bIsSlamming = ActionManager->IsCurrentAction(ActionNames::GroundSlamAction);
+			if (!bIsSlamming)
+			{
+				const bool bHiding = ActionManager->IsCurrentAction(ActionNames::HideAction);
+				UGroundSlamActionData* ActionData = NewObject<UGroundSlamActionData>(this);
+				ActionManager->RequestAction(ActionNames::GroundSlamAction, ActionData);
+			}
+			return;
+		}
+	}
+
 	const bool bHasWeaponOut = IsWeaponUnsheathed();
 	if (bHasWeaponOut)
 	{
-		ULungeActionData* ActionData = NewObject<ULungeActionData>(this);
-		ActionManager->RequestAction(ActionNames::LungeAction, ActionData);	
+		const bool bIsSlashing = ActionManager->IsCurrentAction(ActionNames::SlashAction);
+		if (bIsSlashing)
+		{
+			return;
+		}
+
+		const bool bLunging = ActionManager->IsCurrentAction(ActionNames::LungeAction);
+		if (!bLunging)
+		{
+			if (AttackBuffer.IsEmpty())
+			{
+				ULungeActionData* ActionData = NewObject<ULungeActionData>(this);
+				ActionManager->RequestAction(ActionNames::LungeAction, ActionData);
+			}
+			else
+			{
+				// Buffer Slash.
+				//AttackBuffer.Enqueue(ActionNames::LungeAction);
+			}
+		}
+		else
+		{
+			if (AttackBuffer.IsEmpty())
+			{
+				AttackBuffer.Enqueue(ActionNames::SlashAction);
+			}
+		}
 	}
 }
 
@@ -425,26 +496,6 @@ void ABaseCharacter::OnNorthReleased()
 
 void ABaseCharacter::OnActionPressed()
 {
-	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
-	{
-		const bool bIsFalling = CharacterMovementComp->IsFalling();
-		if (bIsFalling)
-		{
-			if (ActionManager)
-			{
-				const bool bIsSlamming = ActionManager->IsCurrentAction(ActionNames::GroundSlamAction);
-				if (!bIsSlamming)
-				{
-					const bool bHiding = ActionManager->IsCurrentAction(ActionNames::HideAction);					
-					UGroundSlamActionData* ActionData = NewObject<UGroundSlamActionData>(this);
-					ActionManager->RequestAction(ActionNames::GroundSlamAction, ActionData);
-				}
-			}
-	
-			return;
-		}
-	}
-
 	const bool bHasWeaponOut = IsWeaponUnsheathed();
 
 	if (ActionManager)
@@ -568,8 +619,7 @@ void ABaseCharacter::AttachAntennaToHand()
 	}
 
 	const FAttachmentTransformRules Rules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
-	const FName SocketToAttach("WeaponSocket");
-	RightAntenna->AttachToComponent(BodyMesh, Rules, SocketToAttach);
+	RightAntenna->AttachToComponent(BodyMesh, Rules, SocketNames::WeaponSocket);
 }
 
 void ABaseCharacter::DetachAntennaFromHand()
@@ -617,4 +667,14 @@ void ABaseCharacter::SetVelocity(const float Value)
 	FVector NewVelocity = CharacterMovementComp->Velocity.GetSafeNormal();
 	NewVelocity *= Value;
 	CharacterMovementComp->Velocity = NewVelocity;
+}
+
+bool ABaseCharacter::GetWeaponLocation(FVector& WeaponLocation) const
+{
+	if (USkeletalMeshComponent* SkeletalMesh = GetMesh())
+	{
+		WeaponLocation = SkeletalMesh->GetSocketLocation(SocketNames::WeaponSocket);
+		return true;
+	}
+	return false;
 }

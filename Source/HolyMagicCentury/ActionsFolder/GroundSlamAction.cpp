@@ -160,7 +160,7 @@ void UGroundSlamAction::OnLanded(const FHitResult& HitResult)
 	{
 		if (ADestructibleObject* Destructible = Cast<ADestructibleObject>(Actor))
 		{
-			Destructible->Explode(HitResult.Location);
+			Destructible->Explode(HitResult.Location, HitResult.ImpactNormal);
 		}
 	}
 

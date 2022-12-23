@@ -54,6 +54,9 @@ public:
 
 	virtual void CancelAction() override;
 	
+protected:
+	void DestroySmashable(AActor* HitActor, const FVector& HitLocation, const FVector& ImpactNormal, const float ImpactStrength);
+
 private:
 
 };

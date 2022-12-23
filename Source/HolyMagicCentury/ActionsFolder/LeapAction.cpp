@@ -12,6 +12,8 @@
 #include "../AnimationFolder/Notifies/AnimNotify_RaycastDown.h"
 #include <Components/CapsuleComponent.h>
 #include "../ActorsFolder/LeapFlap.h"
+#include <GameFramework/CharacterMovementComponent.h>
+#include "../ActorsFolder/DestructibleObject.h"
 
 ULeapAction::ULeapAction() :
 	Super(),
@@ -111,6 +113,10 @@ void ULeapAction::OnActionProcess(const float DeltaTime)
 
 	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner))
 	{
+		if (UCharacterMovementComponent* CharacterMovement = BaseCharacter->GetCharacterMovement())
+		{
+
+		}
 		if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 		{
 			AnimInstance->SetLeaping(true);
@@ -192,11 +198,11 @@ void ULeapAction::CheckCollisions(const ABaseCharacter& BaseCharacter)
 	const FVector& Start = CapsuleComponent->GetComponentLocation();
 	const FVector& Forward = BaseCharacter.GetActorForwardVector();
 	const float RayLength = 300.0f;
-	FVector Length = FVector(0.0f, RayLength, -50.0f);
-	const FVector End = Start + (Forward * Length);
+	const float ZOffset = 0.0f;// -50.0f;
+	//FVector Length = FVector(0.0f, RayLength, ZOffset);
+	const FVector End = Start + (Forward * RayLength);
 	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(&BaseCharacter);
-
+	QueryParams.AddIgnoredActor(&BaseCharacter);	
 	const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_WorldDynamic, QueryParams);
 
 	bool bPersistent = true;
@@ -228,6 +234,10 @@ void ULeapAction::CheckCollisions(const ABaseCharacter& BaseCharacter)
 				{
 					LeapFlap->OpenFront();
 				}
+			}
+			else if (ADestructibleObject* Destructible = Cast<ADestructibleObject>(HitActor))
+			{
+				Destructible->Explode(HitResult.Location, HitResult.ImpactNormal, 500.0f);
 			}
 		}
 		

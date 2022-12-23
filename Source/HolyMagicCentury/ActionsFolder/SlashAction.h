@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "HolyMagicCentury/ActionsFolder/ActionBase.h"
 #include "AttackAction.h"
-#include "LungeAction.generated.h"
+#include "SlashAction.generated.h"
 
 class ABaseCharacter;
 
@@ -15,17 +15,17 @@ class ABaseCharacter;
 
 namespace ActionNames
 {
-	const FName LungeAction = FName(TEXT("LungeAction"));
+	const FName SlashAction = FName(TEXT("SlashAction"));
 }
 
 UCLASS(EditInlineNew)
-class HOLYMAGICCENTURY_API ULungeActionData : public UAttackActionData
+class HOLYMAGICCENTURY_API USlashActionData : public UAttackActionData
 {
 	GENERATED_BODY()
 
 public:
-	ULungeActionData();
-	virtual ~ULungeActionData();
+	USlashActionData();
+	virtual ~USlashActionData();
 
 	virtual void InitialiseObject() override;
 
@@ -34,16 +34,16 @@ private:
 };
 
 UCLASS(EditInlineNew)
-class HOLYMAGICCENTURY_API ULungeAction : public UAttackAction
+class HOLYMAGICCENTURY_API USlashAction : public UAttackAction
 {
 	GENERATED_BODY()
 
 public:
 
-	RegisterCreateFunction(ULungeAction, ULungeActionData);
+	RegisterCreateFunction(USlashAction, USlashActionData);
 
-	ULungeAction();
-	virtual ~ULungeAction();
+	USlashAction();
+	virtual ~USlashAction();
 
 	virtual void InitialiseAction(UActionDataBase* ActionDataBase) override;
 
@@ -53,10 +53,10 @@ public:
 
 	virtual void OnLanded(const FHitResult& HitResult) override;
 
-	virtual const FName GetActionName() const { return ActionNames::LungeAction; }
+	virtual const FName GetActionName() const { return ActionNames::SlashAction; }
 
 	virtual void CancelAction() override;
-	
+
 private:
 
 	bool CheckForCollision(ABaseCharacter& BaseCharacter);

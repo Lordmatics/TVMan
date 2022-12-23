@@ -40,16 +40,18 @@ void ADestructibleObject::Tick(float DeltaTime)
 
 }
 
-void ADestructibleObject::Explode(const FVector& HitLocation)
-{
+void ADestructibleObject::Explode(const FVector& HitLocation, const FVector& ImpactNormal, const float ImpactStrength)
+{	
 	if (DestructibleComponent)
 	{
 		if (StaticMesh)
 		{
 			StaticMesh->SetVisibility(false);
 			StaticMesh->DestroyComponent();
-		}
-		DestructibleComponent->ApplyDamage(1000.0f, HitLocation, FVector::DownVector, ImpulseStrength);
+		}//FVector::DownVector
+
+		const float Strength = ImpactStrength == 0.0f ? ImpulseStrength : ImpactStrength;
+		DestructibleComponent->ApplyDamage(1000.0f, HitLocation, -ImpactNormal, Strength);
 		DestructibleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }

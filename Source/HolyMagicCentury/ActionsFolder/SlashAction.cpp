@@ -1,5 +1,5 @@
 // Lordmatics Games December 2022
-#include "HolyMagicCentury/ActionsFolder/LungeAction.h"
+#include "HolyMagicCentury/ActionsFolder/SlashAction.h"
 #include "HolyMagicCentury/CharactersFolder/BaseCharacter.h"
 #include "HolyMagicCentury/AnimationFolder/BaseCharacterAnimationInstance.h"
 #include <Engine/World.h>
@@ -7,51 +7,52 @@
 #include "../CharactersFolder/CharacterMontages.h"
 #include <Kismet/KismetSystemLibrary.h>
 #include <DrawDebugHelpers.h>
-#include "SlashAction.h"
+#include "LungeAction.h"
 
-ULungeActionData::ULungeActionData()
+USlashActionData::USlashActionData()
 {
 
 }
 
-ULungeActionData::~ULungeActionData()
+USlashActionData::~USlashActionData()
 {
 
 }
 
-void ULungeActionData::InitialiseObject()
+void USlashActionData::InitialiseObject()
 {
 	Super::InitialiseObject();
 }
 
-ULungeAction::ULungeAction() :
+USlashAction::USlashAction() :
 	Timer(0.0f),
 	RaycastInterval(0.1f)
 {
-	Blacklist.Add(ActionNames::SlashAction);
-	RegisterActionToManager(ActionNames::LungeAction, ULungeAction);
+	Blacklist.Add(ActionNames::LungeAction);
+
+	RegisterActionToManager(ActionNames::SlashAction, USlashAction);
 }
 
-ULungeAction::~ULungeAction()
+USlashAction::~USlashAction()
 {
 
 }
 
-void ULungeAction::InitialiseAction(UActionDataBase* ActionDataBase)
+void USlashAction::InitialiseAction(UActionDataBase* ActionDataBase)
 {
 	Super::InitialiseAction(ActionDataBase);
 
-	ULungeActionData* ActionData = Cast<ULungeActionData>(ActionDataBase);
+	USlashActionData* ActionData = Cast<USlashActionData>(ActionDataBase);
 	if (!ActionData)
 	{
 		return;
 	}
-	
+
 	UObject* Owner = GetOuter();
 	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(Owner))
 	{
 		FCharacterMontages& MontagePacket = BaseCharacter->GetMontagePacket();
-		UAnimMontage* Montage = MontagePacket.LungeMontage;
+		UAnimMontage* Montage = MontagePacket.SlashMontage;
 		if (!Montage)
 		{
 			return;
@@ -62,18 +63,18 @@ void ULungeAction::InitialiseAction(UActionDataBase* ActionDataBase)
 		{
 			if (UBaseCharacterAnimationInstance* AnimInstance = BaseCharacter->GetAnimInstance())
 			{
-				AnimInstance->SetLunging(true);
+				AnimInstance->SetSlashing(true);
 			}
 		}
 	}
 }
 
-void ULungeAction::OnActionCreated()
+void USlashAction::OnActionCreated()
 {
 	Super::OnActionCreated();
 }
 
-void ULungeAction::OnActionProcess(const float DeltaTime)
+void USlashAction::OnActionProcess(const float DeltaTime)
 {
 	Super::OnActionProcess(DeltaTime);
 
@@ -102,13 +103,13 @@ void ULungeAction::OnActionProcess(const float DeltaTime)
 	}
 
 	FCharacterMontages& MontagePacket = BaseCharacter->GetMontagePacket();
-	UAnimMontage* Montage = MontagePacket.LungeMontage;
+	UAnimMontage* Montage = MontagePacket.SlashMontage;
 	if (!Montage)
 	{
 		return;
 	}
 
-	const bool bIsPlaying = AnimInstance->Montage_IsPlaying(Montage);
+	const bool bIsPlaying = AnimInstance->Montage_IsPlaying(Montage);	
 	if (!bIsPlaying)
 	{
 		CancelAction();
@@ -129,7 +130,7 @@ void ULungeAction::OnActionProcess(const float DeltaTime)
 	}
 }
 
-void ULungeAction::OnActionDestroyed()
+void USlashAction::OnActionDestroyed()
 {
 	Super::OnActionDestroyed();
 
@@ -157,12 +158,12 @@ void ULungeAction::OnActionDestroyed()
 	}
 }
 
-void ULungeAction::OnLanded(const FHitResult& HitResult)
+void USlashAction::OnLanded(const FHitResult& HitResult)
 {
 	Super::OnLanded(HitResult);
 }
 
-void ULungeAction::CancelAction()
+void USlashAction::CancelAction()
 {
 	UObject* Owner = GetOuter();
 	if (!Owner)
@@ -185,7 +186,7 @@ void ULungeAction::CancelAction()
 	BaseCharacter->EndAction();
 }
 
-bool ULungeAction::CheckForCollision(ABaseCharacter& BaseCharacter)
+bool USlashAction::CheckForCollision(ABaseCharacter& BaseCharacter)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -194,21 +195,21 @@ bool ULungeAction::CheckForCollision(ABaseCharacter& BaseCharacter)
 	}
 
 	FHitResult HitResult;
-	
+
 	FVector Start;
 	if (!BaseCharacter.GetWeaponLocation(Start))
 	{
 		return false;
 	}
-	
+
 	const FVector& Forward = BaseCharacter.GetActorForwardVector();
 	const float RayLength = 200.0f;
 	FVector Length = FVector(0.0f, RayLength, 0.0f);
 	const FVector End = Start + (Forward * Length);
-	
+
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(&BaseCharacter);
-	
+
 	TArray<AActor*> ActorsToIgnore;
 	AActor* OwnerChar = &BaseCharacter;
 	ActorsToIgnore.Add(OwnerChar);
@@ -216,14 +217,14 @@ bool ULungeAction::CheckForCollision(ABaseCharacter& BaseCharacter)
 	const float Radius = 50.0f;
 	const bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetOuter(), Start, End, Radius, ETraceTypeQuery::TraceTypeQuery2, true,
 		ActorsToIgnore, EDrawDebugTrace::ForOneFrame, HitResult, true);
-		
+
 	if (!bHit)
 	{
 		return false;
 	}
 
 	//const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_WorldDynamic, QueryParams);
-		
+
 	bool bPersistent = true;
 	float LifeTime = 0.0f;
 	if (bHit && HitResult.bBlockingHit)
@@ -232,7 +233,7 @@ bool ULungeAction::CheckForCollision(ABaseCharacter& BaseCharacter)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, World->GetDeltaSeconds(), FColor::Green, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
 		}
-			
+
 		// Red up to the blocking hit, green thereafter
 		DrawDebugLine(World, Start, HitResult.ImpactPoint, FLinearColor::Red.ToFColor(true), bPersistent, LifeTime);
 		DrawDebugLine(World, HitResult.ImpactPoint, End, FLinearColor::Green.ToFColor(true), bPersistent, LifeTime);

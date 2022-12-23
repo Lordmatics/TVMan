@@ -4,6 +4,7 @@
 #include "HolyMagicCentury/AnimationFolder/BaseCharacterAnimationInstance.h"
 #include <Engine/World.h>
 #include "ActionManager.h"
+#include "../ActorsFolder/DestructibleObject.h"
 
 UAttackActionData::UAttackActionData()
 {
@@ -110,4 +111,15 @@ void UAttackAction::CancelAction()
 	}
 
 	BaseCharacter->EndAction();
+}
+
+void UAttackAction::DestroySmashable(AActor* HitActor, const FVector& HitLocation, const FVector& ImpactNormal, const float ImpactStrength)
+{
+	if (HitActor)
+	{
+		if (ADestructibleObject* Destructible = Cast<ADestructibleObject>(HitActor))
+		{
+			Destructible->Explode(HitLocation, ImpactNormal, ImpactStrength);
+		}
+	}
 }

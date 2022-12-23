@@ -24,6 +24,11 @@ namespace MaterialParameterNames
 	const FName Alpha = FName(TEXT("Alpha"));
 }
 
+namespace SocketNames
+{
+	const FName WeaponSocket = FName(TEXT("WeaponSocket"));
+}
+
 UCLASS()
 class HOLYMAGICCENTURY_API ABaseCharacter : public ACharacter
 {
@@ -47,6 +52,7 @@ public:
 	FName GetLastKnownDefaultActionName() const;
 	FORCEINLINE const FCharacterMontages& GetMontagePacket() const { return MontagePacket; }
 	FORCEINLINE FCharacterMontages& GetMontagePacket() { return MontagePacket; }
+	const float GetWeaponStrength() const;
 
 	virtual void Jump() override;	
 	virtual void StopJumping() override;
@@ -90,6 +96,9 @@ public:
 	void DetachAntennaFromHand();
 
 	bool IsWeaponUnsheathed() const;
+	void SetVelocity(const float Value);
+
+	bool GetWeaponLocation(FVector& WeaponLocation) const;
 
 private:
 
@@ -107,7 +116,6 @@ private:
 	virtual void AddControllerYawInput(float Value) override;	
 	virtual void AddControllerPitchInput(float Value) override;
 	
-	void SetVelocity(const float Value);
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
@@ -158,4 +166,5 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character", meta = (AllowPrivateAccess = "true"))
 		FCharacterMontages MontagePacket;
 
+	TQueue<FName> AttackBuffer;
 };

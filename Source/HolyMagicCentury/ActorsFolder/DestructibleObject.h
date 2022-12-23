@@ -22,7 +22,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void Explode(const FVector& HitLocation);
+	void Explode(const FVector& HitLocation, const FVector& ImpactNormal, const float ImpactStrength = 0.0f);
 
 protected:
 	// Called when the game starts or when spawned
