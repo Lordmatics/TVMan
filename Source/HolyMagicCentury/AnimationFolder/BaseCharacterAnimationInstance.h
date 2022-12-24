@@ -45,6 +45,9 @@ public:
 	FORCEINLINE void SetTorso(bool Value) { bUseTorso = Value; }
 	FORCEINLINE bool IsTorso() const { return bUseTorso; }
 
+	FORCEINLINE void SetSpinningSlashing(bool Value) { bSpinningSlashing = Value; }
+	FORCEINLINE bool IsSpinningSlashing() const { return bSpinningSlashing; }
+
 	void ResetNonDefaults();
 
 private:
@@ -72,6 +75,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		bool bSlashing;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		bool bSpinningSlashing;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		bool bUseTorso;

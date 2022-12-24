@@ -19,6 +19,7 @@
 #include "../ActionsFolder/SheatheAction.h"
 #include "../ActionsFolder/LungeAction.h"
 #include "../ActionsFolder/SlashAction.h"
+#include "../ActionsFolder/SpinningSlashAction.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() :
@@ -191,7 +192,13 @@ void ABaseCharacter::Tick(float DeltaTime)
 							USlashActionData* ActionData = NewObject<USlashActionData>(this);
 							ActionManager->RequestAction(Item, ActionData);
 							return;
-						}							
+						}	
+						else if (Item == ActionNames::SpinningSlashAction)
+						{						
+							USpinningSlashActionData* ActionData = NewObject<USpinningSlashActionData>(this);
+							ActionManager->RequestAction(ActionNames::SpinningSlashAction, ActionData);
+							return;
+						}
 					}
 				}
 			}
@@ -409,6 +416,8 @@ void ABaseCharacter::OnAttackPressed()
 		return;
 	}
 
+	const bool bIsSpinning = ActionManager->IsCurrentAction(ActionNames::SpinningSlashAction);
+
 	if (UCharacterMovementComponent* CharacterMovementComp = GetCharacterMovement())
 	{
 		const bool bIsFalling = CharacterMovementComp->IsFalling();
@@ -431,6 +440,10 @@ void ABaseCharacter::OnAttackPressed()
 		const bool bIsSlashing = ActionManager->IsCurrentAction(ActionNames::SlashAction);
 		if (bIsSlashing)
 		{
+			if (AttackBuffer.IsEmpty())
+			{
+				AttackBuffer.Enqueue(ActionNames::SpinningSlashAction);
+			}		
 			return;
 		}
 

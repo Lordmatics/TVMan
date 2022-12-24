@@ -13,6 +13,7 @@ UBaseCharacterAnimationInstance::UBaseCharacterAnimationInstance() :
 	bAttacking(false),
 	bLunging(false),
 	bSlashing(false),
+	bSpinningSlashing(false),
 	bUseTorso(false)
 {
 
